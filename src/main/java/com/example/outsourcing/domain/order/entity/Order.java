@@ -15,10 +15,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
 @Getter
@@ -36,10 +38,34 @@ public class Order extends Timestamped {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "order_id")
-    private List<OrderMenu> orderMenus = new ArrayList<>();
-
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderMenu> orderMenus = new ArrayList<>();
+
+    public static Order of(User user) {
+        Order order = new Order();
+        order.user = user;
+        order.status = Status.PENDING;
+        return order;
+    }
+
+    public void addOrderMenu(OrderMenu orderMenu) {
+        orderMenus.add(orderMenu);
+        //orderMenu.setOrder(this);
+    }
+
+    public void nextStatus() {
+        switch (this.status) {
+            case PENDING -> this.status = Status.ACCEPT;
+            case ACCEPT -> this.status = Status.DELIVERING;
+            case DELIVERING -> this.status = Status.COMPLETED;
+            case COMPLETED -> throw new IllegalStateException("이미 완료된 주문입니다.");
+            default -> throw new IllegalStateException("알 수 없는 상태입니다: " + this.status);
+        }
+    }
 }

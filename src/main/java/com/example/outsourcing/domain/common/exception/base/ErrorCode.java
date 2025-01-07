@@ -25,6 +25,17 @@ public enum ErrorCode {
     TODO_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 게시글이 존재하지 않습니다."),
     MANAGER_NOT_FOUND(HttpStatus.BAD_REQUEST, "매니저가 존재하지 않습니다."),
     TODO_MANAGER_NOT_VALID(HttpStatus.BAD_REQUEST, "해당 일정에 등록된 담당자가 아닙니다."),
+    ORDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 주문이 존재하지 않습니다."),
+    CANNOT_CHANGE_STATUS(HttpStatus.BAD_REQUEST, "주문 상태를 바꿀 수 없습니다."),
+    CART_IS_EMPTY(HttpStatus.BAD_REQUEST, "장바구니가 비어있습니다."),
+    MENU_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 메뉴가 존재하지 않습니다."),
+    MINIMUM_ORDER_NOT_MET(HttpStatus.BAD_REQUEST, "주문 가격이 최소주문금액보다 작습니다."),
+    PRICE_MISMATCH(HttpStatus.BAD_REQUEST, "메뉴의 가격이 다릅니다."),
+    SHOP_CLOSED(HttpStatus.BAD_REQUEST, "영업시간이 아닙니다."),
+    SHOP_DELETED(HttpStatus.BAD_REQUEST, "가게가 망했습니다."),
+    DIFFERENT_SHOP(HttpStatus.BAD_REQUEST, "같은 가게의 음식만 주문 가능합니다."),
+    SHOP_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 가게를 찾을 수 없습니다."),
+
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),

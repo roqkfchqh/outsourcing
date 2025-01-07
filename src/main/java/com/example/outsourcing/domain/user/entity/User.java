@@ -1,5 +1,6 @@
 package com.example.outsourcing.domain.user.entity;
 
+import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.entity.Timestamped;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,8 +27,15 @@ public class User extends Timestamped {
     private String username;
     private String password;
     private String email;
-    private String address;
 
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+
+    public static User fromAuthUser(AuthUser authUser) {
+        User user = new User();
+        user.id = authUser.id();
+        user.email = authUser.email();
+        user.userRole = authUser.userRole();
+        return user;
+    }
 }

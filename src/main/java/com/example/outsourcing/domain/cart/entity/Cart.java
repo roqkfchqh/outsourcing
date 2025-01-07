@@ -13,7 +13,7 @@ public class Cart {
     private Long id;
     private List<MenuItem> items = new ArrayList<>();
     private BigDecimal totalPrice = BigDecimal.ZERO;
-    private int totalCount;
+    private int totalQuantity;
 
     @Data
     @NoArgsConstructor
@@ -21,5 +21,6 @@ public class Cart {
 
         private Long menuId;
         private int quantity;
+        private BigDecimal price;
     }
 }

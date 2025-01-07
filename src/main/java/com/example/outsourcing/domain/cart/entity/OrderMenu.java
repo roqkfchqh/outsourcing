@@ -1,5 +1,6 @@
 package com.example.outsourcing.domain.cart.entity;
 
+import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,6 +28,20 @@ public class OrderMenu {
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
+    //@Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
+
     private int quantity;
     private BigDecimal price = BigDecimal.ZERO;
+
+    public static OrderMenu of(Menu menu, int quantity, BigDecimal price) {
+        OrderMenu orderMenu = new OrderMenu();
+        orderMenu.menu = menu;
+        orderMenu.quantity = quantity;
+        orderMenu.price = price;
+        return orderMenu;
+    }
+
 }
