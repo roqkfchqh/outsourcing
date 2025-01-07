@@ -1,4 +1,4 @@
-package com.example.outsourcing.domain.util;
+package com.example.outsourcing.domain.common.util;
 
 import com.example.outsourcing.domain.user.entity.User.UserRole;
 import io.jsonwebtoken.Claims;

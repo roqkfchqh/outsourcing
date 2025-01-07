@@ -1,4 +1,4 @@
-package com.example.outsourcing.domain.util;
+package com.example.outsourcing.domain.common.util;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;

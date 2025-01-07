@@ -1,6 +1,6 @@
 package com.example.outsourcing.config;
 
-import com.example.outsourcing.domain.util.JwtUtil;
+import com.example.outsourcing.domain.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
