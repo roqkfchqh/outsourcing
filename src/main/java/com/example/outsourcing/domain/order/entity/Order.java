@@ -2,7 +2,6 @@ package com.example.outsourcing.domain.order.entity;
 
 import com.example.outsourcing.domain.cart.entity.OrderMenu;
 import com.example.outsourcing.domain.common.entity.Timestamped;
-import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.user.entity.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -39,10 +38,6 @@ public class Order extends Timestamped {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shop_id")
-    private Shop shop;
-
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -52,9 +47,8 @@ public class Order extends Timestamped {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
-    public static Order of(Shop shop, User user) {
+    public static Order of(User user) {
         Order order = new Order();
-        order.shop = shop;
         order.user = user;
         order.status = Status.PENDING;
         return order;

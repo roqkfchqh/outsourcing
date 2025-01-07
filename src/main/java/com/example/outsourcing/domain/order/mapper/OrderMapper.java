@@ -10,11 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderMapper {
 
-    public OrderResponseDto toDto(Order order, List<OrderMenuResponseDto> orderMenuResponseDto) {
+    public OrderResponseDto toDto(String shopName, Order order,
+        List<OrderMenuResponseDto> orderMenuResponseDto) {
         BigDecimal totalPrice = calculateTotalPrice(orderMenuResponseDto);
 
         return new OrderResponseDto(
-            order.getShop().getName(),
+            shopName,
             order.getUser().getUsername(),
             order.getStatus(),
             orderMenuResponseDto,

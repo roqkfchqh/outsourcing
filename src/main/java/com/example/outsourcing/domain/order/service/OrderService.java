@@ -58,7 +58,7 @@ public class OrderService {
         Cart.MenuItem firstItem = cart.getItems().get(0);
         Shop shop = menus.get(firstItem.getMenuId()).getShop();
 
-        Order order = Order.of(shop, User.fromAuthUser(user));
+        Order order = Order.of(User.fromAuthUser(user));
         List<OrderMenuResponseDto> orderMenusDto = new ArrayList<>();
 
         for (Cart.MenuItem item : cart.getItems()) {
@@ -71,7 +71,7 @@ public class OrderService {
 
         cache.evict(user.id());
 
-        return orderMapper.toDto(order, orderMenusDto);
+        return orderMapper.toDto(shop.getName(), order, orderMenusDto);
     }
 
     @Transactional
@@ -105,11 +105,16 @@ public class OrderService {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
         }
 
+        Shop shop = order.getOrderMenus().stream()
+            .findFirst()
+            .map(orderMenu -> orderMenu.getMenu().getShop())
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
+
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
             .map(orderMenuMapper::toDto)
             .toList();
 
-        return orderMapper.toDto(order, orderMenusDto);
+        return orderMapper.toDto(shop.getName(), order, orderMenusDto);
     }
 
     public List<OrderResponseDto> getOrdersByShop(AuthUser authUser, Long shopId) {
@@ -134,7 +139,7 @@ public class OrderService {
                 List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
                     .map(orderMenuMapper::toDto)
                     .toList();
-                return orderMapper.toDto(order, orderMenusDto);
+                return orderMapper.toDto(shop.getName(), order, orderMenusDto);
             })
             .toList();
     }
