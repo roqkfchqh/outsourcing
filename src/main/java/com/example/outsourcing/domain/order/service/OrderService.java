@@ -15,16 +15,11 @@ import com.example.outsourcing.domain.order.mapper.OrderMenuMapper;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
-import com.example.outsourcing.domain.shop.repository.MenuRepository;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
-import java.math.BigDecimal;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -40,8 +35,8 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderMenuMapper orderMenuMapper;
     private final CacheManager cacheManager;
-    private final MenuRepository menuRepository;
     private final ShopRepository shopRepository;
+    private final CartValidation validator;
 
     // 캐시(cart) 정보 받아와서 그곳에서 확인
     // 해당 주문에 대한 손님 장바구니 데이터 캐시 삭제로직 추가 필요
@@ -58,19 +53,17 @@ public class OrderService {
         }
 
         // 장바구니 유효성검증
-        validateCart(cart);
+        Map<Long, Menu> menus = validator.validateCart(cart);
 
-        Shop shop = shopRepository.findByMenuId(cart.getItems().get(0).getMenuId());
+        Cart.MenuItem firstItem = cart.getItems().get(0);
+        Shop shop = menus.get(firstItem.getMenuId()).getShop();
 
         Order order = Order.of(shop, User.fromAuthUser(user));
         List<OrderMenuResponseDto> orderMenusDto = new ArrayList<>();
-        for (Cart.MenuItem item : cart.getItems()) {
-            Menu menu = menuRepository.findById(item.getMenuId())
-                .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
 
-            OrderMenu orderMenu = OrderMenu.of(
-                menu,
-                item.getQuantity());
+        for (Cart.MenuItem item : cart.getItems()) {
+            Menu menu = menus.get(item.getMenuId());
+            OrderMenu orderMenu = OrderMenu.of(menu, item.getQuantity());
             order.addOrderMenu(orderMenu);
             orderMenusDto.add(orderMenuMapper.toDto(orderMenu));
         }
@@ -91,6 +84,18 @@ public class OrderService {
         order.nextStatus();
     }
 
+    @Transactional
+    public void rejectOrder(AuthUser user, Long orderId) {
+        // 해당 주문을 받은 가게의 사장님인지 확인
+        Order order = orderRepository.findOrderByOwner(orderId, user.id())
+            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
+        // 보류 중인 요청인지 확인
+        if (order.getStatus() != Status.PENDING) {
+            throw new InvalidRequestException(ErrorCode.CANNOT_CHANGE_STATUS);
+        }
+        orderRepository.deleteById(orderId);
+    }
+
     public OrderResponseDto getOrder(AuthUser user, Long orderId) {
         Order order = findOrder(orderId);
 
@@ -105,18 +110,6 @@ public class OrderService {
             .toList();
 
         return orderMapper.toDto(order, orderMenusDto);
-    }
-
-    @Transactional
-    public void rejectOrder(AuthUser user, Long orderId) {
-        // 해당 주문을 받은 가게의 사장님인지 확인
-        Order order = orderRepository.findOrderByOwner(orderId, user.id())
-            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
-        // 보류 중인 요청인지 확인
-        if (order.getStatus() != Status.PENDING) {
-            throw new InvalidRequestException(ErrorCode.CANNOT_CHANGE_STATUS);
-        }
-        orderRepository.deleteById(orderId);
     }
 
     public List<OrderResponseDto> getOrdersByShop(AuthUser authUser, Long shopId) {
@@ -152,68 +145,5 @@ public class OrderService {
     private Order findOrder(Long orderId) {
         return orderRepository.findById(orderId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.ORDER_NOT_FOUND));
-    }
-
-    private void validateCart(Cart cart) {
-        if (cart.getItems().isEmpty()) {
-            throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
-        }
-
-        // 메뉴 조회
-        List<Long> menuIds = cart.getItems().stream()
-            .map(Cart.MenuItem::getMenuId)
-            .toList();
-        Map<Long, Menu> menus = findMenusByIds(menuIds);
-
-        // 첫 번째 메뉴의 Shop 가져오기
-        Cart.MenuItem firstItem = cart.getItems().get(0);
-        Menu firstMenu = menus.get(firstItem.getMenuId());
-        if (firstMenu == null) {
-            throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
-        }
-
-        // 가게 유효성 검사
-        Shop shop = firstMenu.getShop();
-        validateShop(shop);
-
-        // 총 금액 계산 & 검증
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        for (Cart.MenuItem item : cart.getItems()) {
-            Menu menu = menus.get(item.getMenuId());
-            if (menu == null) {
-                throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
-            }
-
-            // 동일한 가게인지 확인
-            if (!menu.getShop().getId().equals(shop.getId())) {
-                throw new InvalidRequestException(ErrorCode.DIFFERENT_SHOP);
-            }
-
-            totalAmount = totalAmount.add(
-                menu.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
-            );
-        }
-
-        // 최소 주문 금액 확인
-        if (totalAmount.compareTo(shop.getMinOrderPrice()) < 0) {
-            throw new InvalidRequestException(ErrorCode.MINIMUM_ORDER_NOT_MET);
-        }
-    }
-
-    private void validateShop(Shop shop) {
-        LocalTime now = LocalTime.now();
-        if (now.isBefore(shop.getOpen().toLocalTime()) || now.isAfter(
-            shop.getClose().toLocalTime())) {
-            throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
-        }
-
-        if (shop.isDeleted()) {
-            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
-        }
-    }
-
-    public Map<Long, Menu> findMenusByIds(List<Long> menuIds) {
-        List<Menu> menus = menuRepository.findByIdIn(menuIds);
-        return menus.stream().collect(Collectors.toMap(Menu::getId, Function.identity()));
     }
 }
