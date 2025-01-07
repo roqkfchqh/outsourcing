@@ -73,7 +73,7 @@ public class OrderService {
         }
         orderRepository.save(order);
 
-        cache.evict("carts");
+        cache.evict("carts");   //TODO: 이거 내일 cache 고유 key 없냐고 물어보기
 
         return orderMapper.toDto(order, orderMenusDto);
     }
