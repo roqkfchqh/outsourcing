@@ -22,6 +22,9 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -40,11 +43,11 @@ public class OrderService {
     private final MenuRepository menuRepository;
     private final ShopRepository shopRepository;
 
-    //캐시(cart) 정보 받아와서 그곳에서 확인
-    //해당 주문에 대한 손님 장바구니 데이터 캐시 삭제로직 추가 필요
+    // 캐시(cart) 정보 받아와서 그곳에서 확인
+    // 해당 주문에 대한 손님 장바구니 데이터 캐시 삭제로직 추가 필요
     @Transactional
     public OrderResponseDto createOrder(AuthUser user) {
-        //장바구니 비어있는지 / 캐시데이터 없는지 확인
+        // 장바구니 비어있는지 / 캐시데이터 없는지 확인
         Cache cache = cacheManager.getCache("carts");
         if (cache == null) {
             throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
@@ -54,7 +57,7 @@ public class OrderService {
             throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
         }
 
-        //장바구니 유효성검증
+        // 장바구니 유효성검증
         validateCart(cart);
 
         Shop shop = shopRepository.findByMenuId(cart.getItems().get(0).getMenuId());
@@ -80,11 +83,11 @@ public class OrderService {
 
     @Transactional
     public void toNextStatus(AuthUser user, Long orderId) {
-        //해당 주문을 받은 가게의 사장님인지 확인
+        // 해당 주문을 받은 가게의 사장님인지 확인
         Order order = orderRepository.findOrderByOwner(orderId, user.id())
             .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
 
-        //다음 상태로 변경
+        // 다음 상태로 변경
         order.nextStatus();
     }
 
@@ -106,10 +109,10 @@ public class OrderService {
 
     @Transactional
     public void rejectOrder(AuthUser user, Long orderId) {
-        //해당 주문을 받은 가게의 사장님인지 확인
+        // 해당 주문을 받은 가게의 사장님인지 확인
         Order order = orderRepository.findOrderByOwner(orderId, user.id())
             .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
-        //보류 중인 요청인지 확인
+        // 보류 중인 요청인지 확인
         if (order.getStatus() != Status.PENDING) {
             throw new InvalidRequestException(ErrorCode.CANNOT_CHANGE_STATUS);
         }
@@ -156,31 +159,42 @@ public class OrderService {
             throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
         }
 
+        // 메뉴 조회
+        List<Long> menuIds = cart.getItems().stream()
+            .map(Cart.MenuItem::getMenuId)
+            .toList();
+        Map<Long, Menu> menus = findMenusByIds(menuIds);
+
         // 첫 번째 메뉴의 Shop 가져오기
         Cart.MenuItem firstItem = cart.getItems().get(0);
-        Menu firstMenu = menuRepository.findById(firstItem.getMenuId())
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+        Menu firstMenu = menus.get(firstItem.getMenuId());
+        if (firstMenu == null) {
+            throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
+        }
 
+        // 가게 유효성 검사
         Shop shop = firstMenu.getShop();
-
-        // 가게 유효성 검사 (운영 시간, 폐업 여부)
         validateShop(shop);
 
-        // 메뉴와 가격 검증, 동일한 가게인지 확인
+        // 총 금액 계산 & 검증
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (Cart.MenuItem item : cart.getItems()) {
-            Menu menu = menuRepository.findById(item.getMenuId())
-                .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+            Menu menu = menus.get(item.getMenuId());
+            if (menu == null) {
+                throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
+            }
 
+            // 동일한 가게인지 확인
             if (!menu.getShop().getId().equals(shop.getId())) {
                 throw new InvalidRequestException(ErrorCode.DIFFERENT_SHOP);
             }
 
             totalAmount = totalAmount.add(
-                menu.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+                menu.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+            );
         }
 
-        // 최소 주문 금액 검증
+        // 최소 주문 금액 확인
         if (totalAmount.compareTo(shop.getMinOrderPrice()) < 0) {
             throw new InvalidRequestException(ErrorCode.MINIMUM_ORDER_NOT_MET);
         }
@@ -196,5 +210,10 @@ public class OrderService {
         if (shop.isDeleted()) {
             throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
         }
+    }
+
+    public Map<Long, Menu> findMenusByIds(List<Long> menuIds) {
+        List<Menu> menus = menuRepository.findByIdIn(menuIds);
+        return menus.stream().collect(Collectors.toMap(Menu::getId, Function.identity()));
     }
 }
