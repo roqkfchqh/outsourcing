@@ -1,4 +1,4 @@
-package com.example.outsourcing.domain.order.entity;
+package com.example.outsourcing.domain.cart.entity;
 
 import com.example.outsourcing.domain.shop.entity.Menu;
 import jakarta.persistence.Entity;

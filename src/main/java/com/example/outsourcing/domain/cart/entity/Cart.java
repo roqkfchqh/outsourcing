@@ -1,4 +1,4 @@
-package com.example.outsourcing.domain.order.entity;
+package com.example.outsourcing.domain.cart.entity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

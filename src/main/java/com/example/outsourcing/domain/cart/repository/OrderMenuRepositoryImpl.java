@@ -1,4 +1,4 @@
-package com.example.outsourcing.domain.order.repository;
+package com.example.outsourcing.domain.cart.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
