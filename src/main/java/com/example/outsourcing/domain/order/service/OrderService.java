@@ -6,10 +6,12 @@ import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.exception.ForbiddenException;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
+import com.example.outsourcing.domain.order.dto.OrderMenuResponseDto;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.order.entity.Order.Status;
 import com.example.outsourcing.domain.order.mapper.OrderMapper;
+import com.example.outsourcing.domain.order.mapper.OrderMenuMapper;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
@@ -18,6 +20,7 @@ import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
@@ -27,10 +30,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final OrderMenuMapper orderMenuMapper;
     private final CacheManager cacheManager;
     private final MenuRepository menuRepository;
     private final ShopRepository shopRepository;
@@ -40,7 +45,7 @@ public class OrderService {
     @Transactional
     public OrderResponseDto createOrder(AuthUser user) {
         //장바구니 비어있는지 / 캐시데이터 없는지 확인
-        Cache cache = cacheManager.getCache("임시 아이디");
+        Cache cache = cacheManager.getCache("carts");
         if (cache == null) {
             throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
         }
@@ -52,22 +57,25 @@ public class OrderService {
         //장바구니 유효성검증
         validateCart(cart);
 
-        Order order = Order.of(User.fromAuthUser(user));
+        Shop shop = shopRepository.findByMenuId(cart.getItems().get(0).getMenuId());
+
+        Order order = Order.of(shop, User.fromAuthUser(user));
+        List<OrderMenuResponseDto> orderMenusDto = new ArrayList<>();
         for (Cart.MenuItem item : cart.getItems()) {
             Menu menu = menuRepository.findById(item.getMenuId())
                 .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
 
             OrderMenu orderMenu = OrderMenu.of(
                 menu,
-                item.getQuantity(),
-                menu.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+                item.getQuantity());
             order.addOrderMenu(orderMenu);
+            orderMenusDto.add(orderMenuMapper.toDto(orderMenu));
         }
         orderRepository.save(order);
 
-        //cache.evict() 캐시삭제
+        cache.evict("carts");
 
-        return orderMapper.toDto(order);
+        return orderMapper.toDto(order, orderMenusDto);
     }
 
     @Transactional
@@ -80,15 +88,20 @@ public class OrderService {
         order.nextStatus();
     }
 
-    @Transactional(readOnly = true)
     public OrderResponseDto getOrder(AuthUser user, Long orderId) {
-        Order order = getOrder(orderId);
+        Order order = findOrder(orderId);
 
-        //주문한사람 정보와 일치하는지 확인
-        if (!order.getUser().getId().equals(user.id())) {
+        //주문한사람 또는 가게 사장님인지 확인
+        if (!order.getUser().getId().equals(user.id()) && !orderRepository.existsOrderByOwner(
+            orderId, user.id())) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
         }
-        return orderMapper.toDto(order);
+
+        List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
+            .map(orderMenuMapper::toDto)
+            .toList();
+
+        return orderMapper.toDto(order, orderMenusDto);
     }
 
     @Transactional
@@ -103,7 +116,6 @@ public class OrderService {
         orderRepository.deleteById(orderId);
     }
 
-    @Transactional(readOnly = true)
     public List<OrderResponseDto> getOrdersByShop(AuthUser authUser, Long shopId) {
         // 가게 확인 (가게가 존재하는지)
         Shop shop = shopRepository.findById(shopId)
@@ -121,16 +133,20 @@ public class OrderService {
 
         List<Order> orders = orderRepository.findAllByShopId(shopId);
 
-        // 5. 주문 리스트를 DTO로 변환
         return orders.stream()
-            .map(orderMapper::toDto)
+            .map(order -> {
+                List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
+                    .map(orderMenuMapper::toDto)
+                    .toList();
+                return orderMapper.toDto(order, orderMenusDto);
+            })
             .toList();
     }
 
     /*
     helper
      */
-    private Order getOrder(Long orderId) {
+    private Order findOrder(Long orderId) {
         return orderRepository.findById(orderId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.ORDER_NOT_FOUND));
     }
@@ -158,10 +174,6 @@ public class OrderService {
 
             if (!menu.getShop().getId().equals(shop.getId())) {
                 throw new InvalidRequestException(ErrorCode.DIFFERENT_SHOP);
-            }
-
-            if (menu.getPrice().compareTo(item.getPrice()) != 0) {
-                throw new InvalidRequestException(ErrorCode.PRICE_MISMATCH);
             }
 
             totalAmount = totalAmount.add(

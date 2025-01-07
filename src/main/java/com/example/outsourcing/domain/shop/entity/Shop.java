@@ -29,6 +29,7 @@ public class Shop extends Timestamped {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private String name;
     private BigDecimal minOrderPrice = BigDecimal.ZERO;
     private Time open;
     private Time close;

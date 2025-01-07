@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,13 +33,11 @@ public class OrderMenu {
     private Order order;
 
     private int quantity;
-    private BigDecimal price = BigDecimal.ZERO;
 
-    public static OrderMenu of(Menu menu, int quantity, BigDecimal price) {
+    public static OrderMenu of(Menu menu, int quantity) {
         OrderMenu orderMenu = new OrderMenu();
         orderMenu.menu = menu;
         orderMenu.quantity = quantity;
-        orderMenu.price = price;
         return orderMenu;
     }
 

@@ -23,4 +23,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "JOIN om.menu m " +
         "WHERE m.shop.id = :shopId")
     List<Order> findAllByShopId(@Param("shopId") Long shopId);
+
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN TRUE ELSE FALSE END " +
+        "FROM Order o " +
+        "JOIN o.orderMenus om " +
+        "JOIN om.menu m " +
+        "JOIN m.shop s " +
+        "JOIN s.user u " +
+        "WHERE o.id = :orderId AND u.id = :ownerId")
+    boolean existsOrderByOwner(@Param("orderId") Long orderId, @Param("orderId") Long ownerId);
 }
