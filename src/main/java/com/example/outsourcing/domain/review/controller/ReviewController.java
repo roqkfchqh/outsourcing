@@ -5,7 +5,7 @@ import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.review.dto.ReviewRequestDto;
-import com.example.outsourcing.domain.review.dto.ReviewResponseDto;
+import com.example.outsourcing.domain.review.dto.ShopReviewResponseDto;
 import com.example.outsourcing.domain.review.dto.UserReviewResponseDto;
 import com.example.outsourcing.domain.review.service.ReviewService;
 import jakarta.validation.Valid;
@@ -45,13 +45,13 @@ public class ReviewController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ReviewResponseDto>> getShopReviews(
+    public ResponseEntity<Page<ShopReviewResponseDto>> getShopReviews(
         @RequestParam Long shopId,
         @RequestParam(defaultValue = PAGE_COUNT) int page,
         @RequestParam(defaultValue = PAGE_SIZE) int size
     ) {
         Pageable pageable = validatePageSize(page, size);
-        Page<ReviewResponseDto> reviews = reviewService.getShopReviews(shopId, pageable);
+        Page<ShopReviewResponseDto> reviews = reviewService.getShopReviews(shopId, pageable);
         return ResponseEntity.ok(reviews);
     }
 

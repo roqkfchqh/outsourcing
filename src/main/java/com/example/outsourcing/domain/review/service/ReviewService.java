@@ -8,7 +8,7 @@ import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.order.entity.Order.Status;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.review.dto.ReviewRequestDto;
-import com.example.outsourcing.domain.review.dto.ReviewResponseDto;
+import com.example.outsourcing.domain.review.dto.ShopReviewResponseDto;
 import com.example.outsourcing.domain.review.dto.UserReviewResponseDto;
 import com.example.outsourcing.domain.review.entity.Review;
 import com.example.outsourcing.domain.review.mapper.ReviewMapper;
@@ -60,7 +60,7 @@ public class ReviewService {
         return ReviewMapper.toUserReviewDto(review);
     }
 
-    public Page<ReviewResponseDto> getShopReviews(Long shopId, Pageable pageable) {
+    public Page<ShopReviewResponseDto> getShopReviews(Long shopId, Pageable pageable) {
         Shop shop = shopRepository.findById(shopId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
         if (shop.isDeleted()) {
