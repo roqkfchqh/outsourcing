@@ -39,4 +39,14 @@ public class Review extends Timestamped {
 
     private String content;
     private int rating;
+
+    public static Review of(User user, Shop shop, Order order, String content, int rating) {
+        Review review = new Review();
+        review.user = user;
+        review.shop = shop;
+        review.order = order;
+        review.content = content;
+        review.rating = rating;
+        return review;
+    }
 }

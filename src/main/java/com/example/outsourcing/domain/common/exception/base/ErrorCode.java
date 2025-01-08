@@ -35,6 +35,9 @@ public enum ErrorCode {
     SHOP_DELETED(HttpStatus.BAD_REQUEST, "가게가 망했습니다."),
     DIFFERENT_SHOP(HttpStatus.BAD_REQUEST, "같은 가게의 음식만 주문 가능합니다."),
     SHOP_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 가게를 찾을 수 없습니다."),
+    AlREADY_REVIEWED(HttpStatus.BAD_REQUEST, "해당 주문에 대한 리뷰가 이미 존재합니다."),
+    NOT_COMPLETED_ORDER(HttpStatus.BAD_REQUEST, "완료 처리된 주문이 아닙니다."),
+    REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "완료 처리된 주문이 아닙니다."),
 
 
     //forbidden
