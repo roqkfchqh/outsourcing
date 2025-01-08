@@ -1,6 +1,5 @@
 package com.example.outsourcing.domain.cart.entity;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -12,8 +11,7 @@ public class Cart {
 
     private Long id;
     private List<MenuItem> items = new ArrayList<>();
-    private BigDecimal totalPrice = BigDecimal.ZERO;
-    private int totalCount;
+    private int totalQuantity;
 
     @Data
     @NoArgsConstructor
@@ -21,5 +19,15 @@ public class Cart {
 
         private Long menuId;
         private int quantity;
+
+        public MenuItem(Long menuId, int quantity) {
+            this.menuId = menuId;
+            this.quantity = quantity;
+        }
+    }
+
+    public Cart(List<MenuItem> items) {
+        this.items = items;
+        this.totalQuantity = items.stream().mapToInt(MenuItem::getQuantity).sum();
     }
 }

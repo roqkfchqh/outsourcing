@@ -29,4 +29,11 @@ public class Menu {
     private String name;
     private String description;
     private BigDecimal price = BigDecimal.ZERO;
+
+    public Menu(Long id, String name, BigDecimal price, Shop shop) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.shop = shop;
+    }
 }
