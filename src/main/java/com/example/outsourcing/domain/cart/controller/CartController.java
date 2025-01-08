@@ -6,6 +6,7 @@ import com.example.outsourcing.domain.common.annotation.Auth;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,5 +35,24 @@ public class CartController {
 		Cart cart = cartService.addItemToCart(authUser, menuId);
 
 		return ResponseEntity.ok(cart);
+	}
+
+	@DeleteMapping("/items/{menuId}")
+	public ResponseEntity<Cart> removeItemFromCart(
+		@Auth AuthUser authUser,
+		@PathVariable Long menuId
+	) {
+		Cart cart = cartService.removeItemFromCart(authUser, menuId);
+
+		return ResponseEntity.ok(cart);
+	}
+
+	@DeleteMapping("/items")
+	public ResponseEntity<Void> clearCart(
+		@Auth AuthUser authUser
+	) {
+		cartService.clearCart(authUser);
+
+		return ResponseEntity.noContent().build();
 	}
 }

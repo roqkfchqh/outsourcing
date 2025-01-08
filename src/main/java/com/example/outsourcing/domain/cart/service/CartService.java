@@ -9,10 +9,13 @@ import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.ServerException;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
+import com.example.outsourcing.domain.shop.repository.ShopRepository;
+import com.example.outsourcing.domain.user.repository.UserRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,8 @@ public class CartService {
 	private static final String CACHE_NAME = "carts";
 	private final CacheManager cacheManager;
 	private final MenuRepository menuRepository;
+	private final UserRepository userRepository;
+	private final ShopRepository shopRepository;
 
 	@Cacheable(value = CACHE_NAME, key = "#authUser.id")
 	public Cart getCart(AuthUser authUser) {
@@ -38,6 +43,19 @@ public class CartService {
 		cart.addItem(menuId, menu.getShop().getId());
 
 		return cart;
+	}
+
+	@CachePut(value = CACHE_NAME, key = "#authUser.id")
+	public Cart removeItemFromCart(AuthUser authUser, Long menuId) {
+		Cart cart = getOrCreateCart(authUser.id());
+		cart.removeItem(menuId);
+
+		return cart;
+	}
+
+	// 캐시에서 삭제
+	@CacheEvict(value = CACHE_NAME, key = "#authUser.id")
+	public void clearCart(AuthUser authUser) {
 	}
 
 	private Cart getOrCreateCart(Long userId) {

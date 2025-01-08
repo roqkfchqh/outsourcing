@@ -1,5 +1,7 @@
 package com.example.outsourcing.domain.cart.entity;
 
+import com.example.outsourcing.domain.common.exception.InvalidRequestException;
+import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -32,6 +34,19 @@ public class Cart {
 			);
 	}
 
+	public void removeItem(Long menuItemId) {
+		MenuItem menuItem = items.stream()
+			.filter(item -> item.getMenuId().equals(menuItemId))
+			.findFirst()
+			.orElseThrow(() -> new InvalidRequestException(ErrorCode.CART_ITEM_NOT_FOUND));
+
+		// 장바구니에서 물건 뺐을 때 수량이 없다면 지워주기
+		menuItem.decrease();
+		if (menuItem.getQuantity() == 0) {
+			items.remove(menuItem);
+		}
+	}
+
 	@Getter
 	public static class MenuItem {
 
@@ -45,6 +60,10 @@ public class Cart {
 
 		private void increase() {
 			this.quantity += 1;
+		}
+
+		private void decrease() {
+			this.quantity -= 1;
 		}
 	}
         private Long menuId;
