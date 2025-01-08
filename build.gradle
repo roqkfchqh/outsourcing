@@ -41,7 +41,10 @@ dependencies {
 
     //데이터베이스(영빈)
 
-    //데이터베이스(주양)
+    //데이터베이스(주양 - mySql)
+    implementation 'org.springframework.boot:spring-boot-starter'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     //데이터베이스(채영 - postgresql)
     //postgresql

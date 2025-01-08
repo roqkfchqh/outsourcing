@@ -1,5 +1,6 @@
 package com.example.outsourcing.domain.user.entity;
 
+import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.entity.Timestamped;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,17 +18,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User extends Timestamped {
 
-    public enum UserRole {OWNER, USER}
+  public enum UserRole {
+    OWNER,
+    USER
+  }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String username;
-    private String password;
-    private String email;
-    private String address;
+  private String username;
+  private String password;
+  private String email;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole userRole;
+  @Enumerated(EnumType.STRING)
+  private UserRole userRole;
+
+  public User(String username, String password, String email) {
+    this.username = username;
+    this.password = password;
+    this.email = email;
+  }
+
+  public static User fromAuthUser(AuthUser authUser) {
+    User user = new User();
+    user.id = authUser.id();
+    user.email = authUser.email();
+    user.userRole = authUser.userRole();
+    return user;
+  }
 }
