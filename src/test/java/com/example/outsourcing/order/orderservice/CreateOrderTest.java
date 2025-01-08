@@ -56,11 +56,12 @@ class CreateOrderTest {
     void createOrder_ShouldReturnOrderResponseDto_유효한_값() {
         AuthUser authUser = new AuthUser(1L, "Test User", UserRole.USER);
         Cart.MenuItem menuItem = new Cart.MenuItem(1L, 2);
-        Cart cart = new Cart(List.of(menuItem));
+        Cart cart = new Cart(1L, List.of(menuItem));
         Shop shop = new Shop(1L, "Test Shop", BigDecimal.valueOf(50), null, null, false);
         Menu menu = new Menu(1L, "Test Menu", BigDecimal.valueOf(10), shop);
         OrderMenu orderMenu = new OrderMenu(menu, 2);
         Order order = new Order(
+            BigDecimal.valueOf(20),
             User.fromAuthUser(authUser),
             Order.Status.PENDING,
             List.of(orderMenu));
@@ -78,7 +79,10 @@ class CreateOrderTest {
 
         when(orderCartService.getCartData(authUser.id())).thenReturn(cart);
         when(orderCartValidation.validateCartAndReturnMenu(cart)).thenReturn(Map.of(1L, menu));
-        when(orderFactory.createOrder(any(User.class), anyMap(), anyList())).thenReturn(order);
+        when(orderFactory.createOrder(any(User.class), any(BigDecimal.class), anyMap(), anyList()))
+            .thenReturn(order);
+        when(orderCartValidation.validateShop(any(Long.class), any(BigDecimal.class))).thenReturn(
+            shop);
 
         OrderResponseDto result = orderService.createOrder(authUser);
 

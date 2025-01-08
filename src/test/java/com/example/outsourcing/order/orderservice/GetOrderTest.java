@@ -57,13 +57,13 @@ public class GetOrderTest {
 
     @Test
     void getOrder_ShouldThrowForbiddenException_WhenUserIsUnauthorized() {
-        AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
+        AuthUser user = new AuthUser(2L, "tesghUser", UserRole.USER);
         Long orderId = 1L;
         Shop shop = new Shop(1L, "Test Shop", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
             LocalTime.parse("18:00:00"), false);
         Menu menu = new Menu(1L, "Test Menu", BigDecimal.TEN, shop);
         OrderMenu orderMenu = OrderMenu.of(menu, 2);
-        Order order = new Order(User.fromAuthUser(user), Status.PENDING, List.of(orderMenu));
+        Order order = new Order(new User(), Status.PENDING, List.of(orderMenu));
         orderMenu.assignOrder(order);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));

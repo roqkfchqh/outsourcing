@@ -19,6 +19,7 @@ import com.example.outsourcing.domain.user.entity.User;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,8 +80,8 @@ public class OrderService {
         Order order = findOrder(orderId);
 
         //주문한 사람도, 가게 사장님도 아닐 경우 throw error
-        if (!order.getUser().getId().equals(user.id()) || !orderRepository.existsOrderByOwner(
-            orderId, user.id())) {
+        if (!Objects.equals(order.getUser().getId(), user.id()) &&
+            !orderRepository.existsOrderByOwner(orderId, user.id())) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
         }
 

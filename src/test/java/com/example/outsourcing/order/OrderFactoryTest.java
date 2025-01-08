@@ -30,10 +30,23 @@ class OrderFactoryTest {
             new Shop(1L, "Test Shop", BigDecimal.valueOf(50), null, null, false));
         Cart.MenuItem menuItem = new Cart.MenuItem(1L, 2);
 
-        Order order = orderFactory.createOrder(user, Map.of(1L, menu), List.of(menuItem));
+        Order order = orderFactory.createOrder(user, BigDecimal.valueOf(20), Map.of(1L, menu),
+            List.of(menuItem));
 
         assertNotNull(order);
         assertEquals(user, order.getUser());
         assertEquals(1, order.getOrderMenus().size());
+        assertEquals(BigDecimal.valueOf(20), order.getTotalPrice());
+    }
+
+    @Test
+    void createOrder_ShouldHandleEmptyMenuItems_메뉴리스트_비어있을때() {
+        User user = new User(1L, "Test User");
+
+        Order order = orderFactory.createOrder(user, BigDecimal.ZERO, Map.of(), List.of());
+
+        assertNotNull(order);
+        assertEquals(0, order.getOrderMenus().size());
+        assertEquals(BigDecimal.ZERO, order.getTotalPrice());
     }
 }

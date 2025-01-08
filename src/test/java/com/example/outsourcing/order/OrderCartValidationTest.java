@@ -11,16 +11,16 @@ import com.example.outsourcing.domain.order.service.OrderCartValidation;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
+import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +31,9 @@ class OrderCartValidationTest {
 
     @Mock
     private MenuRepository menuRepository;
+
+    @Mock
+    private ShopRepository shopRepository;
 
     @Test
     void validateCartAndReturnMenu_ShouldReturnMenus_유효한_값() {
@@ -52,15 +55,6 @@ class OrderCartValidationTest {
         assertEquals(1, result.size());
     }
 
-
-    @Test
-    void validateCartAndReturnMenu_ShouldThrowException_장바구니가_비어있을때() {
-        Cart cart = new Cart(List.of());
-
-        assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateCartAndReturnMenu(cart));
-    }
-
     @Test
     void validateCartAndReturnMenu_ShouldThrowException_해당메뉴를_찾을수없을때() {
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 2)));
@@ -72,65 +66,56 @@ class OrderCartValidationTest {
     }
 
     @Test
-    void validateCartAndReturnMenu_ShouldThrowException_메뉴별로_가게가_다를때() {
-        Cart cart = new Cart(List.of(
-            new Cart.MenuItem(1L, 2),
-            new Cart.MenuItem(2L, 3)
-        ));
-        Menu menu1 = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
-            new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
-                LocalTime.parse("18:00:00"), false));
-        Menu menu2 = new Menu(2L, "Menu 2", BigDecimal.valueOf(20),
-            new Shop(2L, "Shop 2", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
-                LocalTime.parse("18:00:00"), false));
+    void validateShop_ShouldReturnShop_유효한_값() {
+        Long shopId = 1L;
+        BigDecimal totalPrice = BigDecimal.valueOf(100);
+        Shop shop = new Shop(shopId, "Test Shop", BigDecimal.valueOf(50),
+            LocalTime.parse("09:00:00"), LocalTime.parse("21:00:00"), false);
 
-        when(menuRepository.findByIdIn(List.of(1L, 2L))).thenReturn(List.of(menu1, menu2));
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
-        assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateCartAndReturnMenu(cart));
+        Shop result = orderCartValidation.validateShop(shopId, totalPrice);
+
+        assertNotNull(result);
+        assertEquals(shopId, result.getId());
+        assertEquals("Test Shop", result.getName());
     }
 
     @Test
-    void validateCartAndReturnMenu_ShouldThrowException_최소주문금액보다_작을때() {
-        Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 1)));
-        Menu menu = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
-            new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
-                LocalTime.parse("18:00:00"), false));
+    void validateShop_ShouldThrowException_가게를_찾을수없을때() {
+        Long shopId = 1L;
+        BigDecimal totalPrice = BigDecimal.valueOf(100);
 
-        when(menuRepository.findByIdIn(List.of(1L))).thenReturn(List.of(menu));
+        when(shopRepository.findById(shopId)).thenReturn(Optional.empty());
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateCartAndReturnMenu(cart));
+            () -> orderCartValidation.validateShop(shopId, totalPrice));
     }
 
     @Test
-    void validateCartAndReturnMenu_ShouldThrowException_가게_영업시간이_아닐때() {
-        Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 1)));
-        Menu menu = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
-            new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
-                LocalTime.parse("18:00:00"), false));
+    void validateShop_ShouldThrowException_가게가_폐업했을때() {
+        Long shopId = 1L;
+        BigDecimal totalPrice = BigDecimal.valueOf(100);
+        Shop shop = new Shop(shopId, "Test Shop", BigDecimal.valueOf(50),
+            LocalTime.parse("09:00:00"), LocalTime.parse("18:00:00"), true);
 
-        when(menuRepository.findByIdIn(List.of(1L))).thenReturn(List.of(menu));
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
-        LocalTime now = LocalTime.of(20, 0); // 가게 닫힌 시간에 주문
-        try (MockedStatic<LocalTime> mockedTime = Mockito.mockStatic(LocalTime.class)) {
-            mockedTime.when(LocalTime::now).thenReturn(now);
-
-            assertThrows(InvalidRequestException.class,
-                () -> orderCartValidation.validateCartAndReturnMenu(cart));
-        }
+        assertThrows(InvalidRequestException.class,
+            () -> orderCartValidation.validateShop(shopId, totalPrice));
     }
 
     @Test
-    void validateCartAndReturnMenu_ShouldThrowException_가게가_폐업했을때() {
-        Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 1)));
-        Menu menu = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
-            new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
-                LocalTime.parse("18:00:00"), true));
+    void validateShop_ShouldThrowException_최소주문금액_미달일때() {
+        Long shopId = 1L;
+        BigDecimal totalPrice = BigDecimal.valueOf(30); // 최소 주문 금액 미달
+        Shop shop = new Shop(shopId, "Test Shop", BigDecimal.valueOf(50),
+            LocalTime.parse("09:00:00"), LocalTime.parse("18:00:00"), false);
 
-        when(menuRepository.findByIdIn(List.of(1L))).thenReturn(List.of(menu));
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateCartAndReturnMenu(cart));
+            () -> orderCartValidation.validateShop(shopId, totalPrice));
     }
+
 }

@@ -73,6 +73,13 @@ public class Order extends Timestamped {
         }
     }
 
+    public Order(BigDecimal totalPrice, User user, Status status, List<OrderMenu> orderMenus) {
+        this.totalPrice = totalPrice;
+        this.user = user;
+        this.status = status;
+        this.orderMenus = orderMenus;
+    }
+
     public Order(User user, Status status, List<OrderMenu> orderMenus) {
         this.user = user;
         this.status = status;
