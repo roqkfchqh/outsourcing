@@ -4,6 +4,7 @@ import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -48,6 +49,7 @@ public class Cart {
 	}
 
 	@Getter
+	@AllArgsConstructor
 	public static class MenuItem {
 
 		private final Long menuId;
@@ -66,12 +68,4 @@ public class Cart {
 			this.quantity -= 1;
 		}
 	}
-        private Long menuId;
-        private int quantity;
-
-        public MenuItem(Long menuId, int quantity) {
-            this.menuId = menuId;
-            this.quantity = quantity;
-        }
-    }
 }
