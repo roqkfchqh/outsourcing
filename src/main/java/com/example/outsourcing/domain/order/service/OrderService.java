@@ -1,7 +1,6 @@
 package com.example.outsourcing.domain.order.service;
 
 import com.example.outsourcing.domain.cart.entity.Cart;
-import com.example.outsourcing.domain.cart.entity.OrderMenu;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.exception.ForbiddenException;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
@@ -17,12 +16,9 @@ import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,42 +30,35 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final OrderMenuMapper orderMenuMapper;
-    private final CacheManager cacheManager;
     private final ShopRepository shopRepository;
-    private final CartValidation validator;
+    private final OrderCartValidation validator;
+    private final OrderCartService orderCartService;
+    private final OrderFactory orderFactory;
 
-    // 캐시(cart) 정보 받아와서 그곳에서 확인
-    // 해당 주문에 대한 손님 장바구니 데이터 캐시 삭제로직 추가 필요
+    // 캐시(cart) 정보 받아와서 검증 후 주문 create
     @Transactional
     public OrderResponseDto createOrder(AuthUser user) {
-        // 장바구니 비어있는지 / 캐시데이터 없는지 확인
-        Cache cache = cacheManager.getCache("carts");
-        if (cache == null) {
-            throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
-        }
-        Cart cart = cache.get(user.id(), Cart.class);
-        if (cart == null || cart.getItems().isEmpty()) {
-            throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
-        }
+        // 캐시에서 장바구니 데이터 가져오기
+        Cart cart = orderCartService.getCartData(user.id());
 
-        // 장바구니 유효성검증
-        Map<Long, Menu> menus = validator.validateCart(cart);
+        // 장바구니 유효성검증 후 메뉴 반환
+        Map<Long, Menu> menus = validator.validateCartAndReturnMenu(cart);
 
+        // 첫 번째 아이템으로 가게 정보 가져오기
         Cart.MenuItem firstItem = cart.getItems().get(0);
         Shop shop = menus.get(firstItem.getMenuId()).getShop();
 
-        Order order = Order.of(User.fromAuthUser(user));
-        List<OrderMenuResponseDto> orderMenusDto = new ArrayList<>();
+        // Order 생성
+        Order order = orderFactory.createOrder(User.fromAuthUser(user), menus, cart.getItems());
 
-        for (Cart.MenuItem item : cart.getItems()) {
-            Menu menu = menus.get(item.getMenuId());
-            OrderMenu orderMenu = OrderMenu.of(menu, item.getQuantity());
-            order.addOrderMenu(orderMenu);
-            orderMenusDto.add(orderMenuMapper.toDto(orderMenu));
-        }
+        // 저장 & 캐시 제거
         orderRepository.save(order);
+        orderCartService.evictCartData(user.id());
 
-        cache.evict(user.id());
+        // 응답 DTO 반환
+        List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
+            .map(orderMenuMapper::toDto)
+            .toList();
 
         return orderMapper.toDto(shop.getName(), order, orderMenusDto);
     }

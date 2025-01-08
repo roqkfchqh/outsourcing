@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class CartValidation {
+public class OrderCartValidation {
 
     private final MenuRepository menuRepository;
 
-    public Map<Long, Menu> validateCart(Cart cart) {
+    public Map<Long, Menu> validateCartAndReturnMenu(Cart cart) {
         if (cart.getItems().isEmpty()) {
             throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
         }
@@ -65,7 +65,6 @@ public class CartValidation {
 
         return menus;
     }
-
 
     private Map<Long, Menu> findMenusByIds(List<Long> menuIds) {
         List<Menu> menus = menuRepository.findByIdIn(menuIds);
