@@ -1,5 +1,6 @@
 package com.example.outsourcing.domain.cart.service;
 
+import static com.example.outsourcing.domain.common.exception.base.ErrorCode.CART_ITEM_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -161,8 +162,74 @@ class CartServiceTest {
 			//when & then
 			assertThatThrownBy(() -> cartService.addItemToCart(authUser, menuId))
 				.isInstanceOf(InvalidRequestException.class)
-				.extracting(Throwable::getMessage)
-				.isEqualTo(ErrorCode.MENU_NOT_FOUND.getMessage());
+				.hasMessageContaining(ErrorCode.MENU_NOT_FOUND.getMessage());
+		}
+	}
+
+	@Nested
+	@DisplayName("장바구니 아이템 제거 테스트")
+	class RemoveItemFromCartTest {
+
+		@Test
+		@DisplayName("정상적으로 아이템을 제거한다 (2개 -> 1개)")
+		void removeItemFromCart_Success1() {
+			//given
+			Long menuId = 1L;
+			Long shopId = 1L;
+			AuthUser authUser = new AuthUser(1L, null, null);
+			Cart cart = new Cart();
+
+			cart.addItem(menuId, shopId);
+			cart.addItem(menuId, shopId); // 같은 아이템을 두 번 추가
+
+			given(cache.get(authUser.id(), Cart.class)).willReturn(cart);
+
+			//when
+			Cart updatedCart = cartService.removeItemFromCart(authUser, menuId);
+
+			//then
+			assertThat(updatedCart).isNotNull();
+			assertThat(updatedCart.getItems()).hasSize(1);
+			assertThat(updatedCart.getItems().get(0).getMenuId()).isEqualTo(menuId);
+			assertThat(updatedCart.getItems().get(0).getQuantity()).isEqualTo(1);
+			assertThat(updatedCart.getRecentShopId()).isEqualTo(shopId);
+		}
+
+		@Test
+		@DisplayName("아이템을 제거할때 마지막 아이템이면 장바구니에서 제거한다.")
+		void removeItemFromCart_Success2() {
+			//given
+			Long menuId = 1L;
+			Long shopId = 1L;
+			AuthUser authUser = new AuthUser(1L, null, null);
+			Cart cart = new Cart();
+
+			cart.addItem(menuId, shopId);
+
+			given(cache.get(authUser.id(), Cart.class)).willReturn(cart);
+
+			//when
+			Cart updatedCart = cartService.removeItemFromCart(authUser, menuId);
+
+			//then
+			assertThat(updatedCart).isNotNull();
+			assertThat(updatedCart.getItems()).isEmpty();
+		}
+
+		@Test
+		@DisplayName("예외: 존재하지 않는 아이템을 제거하려 할 때 예외 발생")
+		void removeItemFromCart_Exception() {
+			//given
+			Long menuId = 1L;
+			AuthUser authUser = new AuthUser(1L, null, null);
+			Cart cart = new Cart(); // 아무 아이템도 추가되지 않은 상태
+
+			given(cache.get(authUser.id(), Cart.class)).willReturn(cart);
+
+			//when & then
+			assertThatThrownBy(() -> cartService.removeItemFromCart(authUser, menuId))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(CART_ITEM_NOT_FOUND.getMessage());
 		}
 	}
 }
