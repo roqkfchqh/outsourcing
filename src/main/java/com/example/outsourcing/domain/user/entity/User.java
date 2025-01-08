@@ -34,10 +34,11 @@ public class User extends Timestamped {
   @Enumerated(EnumType.STRING)
   private UserRole userRole;
 
-  public User(String username, String password, String email) {
+  public User(String username, String password, String email, UserRole userRole) {
     this.username = username;
     this.password = password;
     this.email = email;
+    this.userRole = userRole;
   }
 
   public static User fromAuthUser(AuthUser authUser) {

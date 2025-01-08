@@ -26,15 +26,25 @@ public class UserService {
     if (userRepository.existsByEmail(requestDto.getEmail())) {
       throw new InvalidRequestException(ALREADY_USED_EMAIL);
     }
+    /*
+    비밀번호 조건에 맞는지 확인하는 로직 추가해야함.
+     */
     User user =
         new User(
             requestDto.getUsername(),
             passwordEncoder.encode(requestDto.getPassword()),
-            requestDto.getEmail());
+            requestDto.getEmail(),
+            requestDto.getUserRole());
 
     User savedUser = userRepository.save(user);
     String bearerToken =
         jwtUtil.createToken(savedUser.getId(), savedUser.getEmail(), savedUser.getUserRole());
     return new UserResponseDto(bearerToken);
   }
+
+  // public UserResponseDto login(UserRequestDto requestDto) {}
+
+  //  public UserResponseDto logout(UserRequestDto requestDto) {
+  //
+  //  }
 }
