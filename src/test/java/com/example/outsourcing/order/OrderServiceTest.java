@@ -2,6 +2,7 @@ package com.example.outsourcing.order;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -10,6 +11,8 @@ import static org.mockito.Mockito.when;
 import com.example.outsourcing.domain.cart.entity.Cart;
 import com.example.outsourcing.domain.cart.entity.OrderMenu;
 import com.example.outsourcing.domain.common.dto.AuthUser;
+import com.example.outsourcing.domain.common.exception.InvalidRequestException;
+import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.order.dto.OrderMenuResponseDto;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.entity.Order;
@@ -92,5 +95,29 @@ class OrderServiceTest {
         assertNotNull(result);
         assertEquals(expectedResponse.shopName(), result.shopName());
         assertEquals(expectedResponse.totalPrice(), result.totalPrice());
+    }
+
+    @Test
+    void createOrder_ShouldThrowException_장바구니가_비어있을때() {
+        // Given
+        AuthUser authUser = new AuthUser(1L, "Test User", UserRole.USER);
+        when(orderCartService.getCartData(authUser.id())).thenThrow(new InvalidRequestException(
+            ErrorCode.CART_IS_EMPTY));
+
+        // When & Then
+        assertThrows(InvalidRequestException.class, () -> orderService.createOrder(authUser));
+    }
+
+    @Test
+    void createOrder_ShouldThrowException_해당메뉴를_찾을수없을때() {
+        // Given
+        AuthUser authUser = new AuthUser(1L, "Test User", UserRole.USER);
+        Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 2)));
+        when(orderCartService.getCartData(authUser.id())).thenReturn(cart);
+        when(orderCartValidation.validateCartAndReturnMenu(cart))
+            .thenThrow(new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+
+        // When & Then
+        assertThrows(InvalidRequestException.class, () -> orderService.createOrder(authUser));
     }
 }

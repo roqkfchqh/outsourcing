@@ -75,8 +75,7 @@ public class OrderCartValidation {
 
     private void validateShop(Shop shop) {
         LocalTime now = LocalTime.now();
-        if (now.isBefore(shop.getOpen().toLocalTime()) || now.isAfter(
-            shop.getClose().toLocalTime())) {
+        if (now.isBefore(shop.getOpen()) || now.isAfter(shop.getClose())) {
             throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
         }
 
