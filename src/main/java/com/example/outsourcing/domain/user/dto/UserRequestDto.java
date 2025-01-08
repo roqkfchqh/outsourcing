@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserRequestDto {
 
-  private String username;
-  private String password;
-  private String email;
-  private UserRole userRole;
+    private String username;
+    private String password;
+    private String email;
+    private UserRole userRole;
 }

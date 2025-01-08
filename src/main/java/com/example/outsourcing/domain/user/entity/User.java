@@ -18,34 +18,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User extends Timestamped {
 
-  public enum UserRole {
-    OWNER,
-    USER
-  }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String username;
+    private String password;
+    private String email;
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    public User(String username, String password, String email, UserRole userRole) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.userRole = userRole;
+    }
 
-  private String username;
-  private String password;
-  private String email;
+    public static User fromAuthUser(AuthUser authUser) {
+        User user = new User();
+        user.id = authUser.id();
+        user.email = authUser.email();
+        user.userRole = authUser.userRole();
+        return user;
+    }
 
-  @Enumerated(EnumType.STRING)
-  private UserRole userRole;
-
-  public User(String username, String password, String email, UserRole userRole) {
-    this.username = username;
-    this.password = password;
-    this.email = email;
-    this.userRole = userRole;
-  }
-
-  public static User fromAuthUser(AuthUser authUser) {
-    User user = new User();
-    user.id = authUser.id();
-    user.email = authUser.email();
-    user.userRole = authUser.userRole();
-    return user;
-  }
+    public enum UserRole {
+        OWNER,
+        USER
+    }
 }
