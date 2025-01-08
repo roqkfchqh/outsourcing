@@ -29,6 +29,7 @@ public class Menu {
     private String name;
     private String description;
     private BigDecimal price = BigDecimal.ZERO;
+    private boolean isDeleted = false;
 
     public Menu(Long id, String name, BigDecimal price, Shop shop) {
         this.id = id;

@@ -33,7 +33,7 @@ public class OrderCartValidation {
         for (Cart.MenuItem item : cart.getItems()) {
             Menu menu = menus.get(item.getMenuId());
             //해당 메뉴가 유효한지 검증
-            if (menu == null) {
+            if (menu == null || menu.isDeleted()) {
                 throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
             }
         }
