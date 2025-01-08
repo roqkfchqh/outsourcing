@@ -35,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class OrderServiceTest {
 
     @InjectMocks
-    private OrderService orderService; // 실제 테스트 대상 클래스
+    private OrderService orderService;
 
     @Mock
     private OrderCartService orderCartService;
