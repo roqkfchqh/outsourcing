@@ -1,4 +1,4 @@
-package com.example.outsourcing.order;
+package com.example.outsourcing.order.orderservice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class OrderServiceTest {
+class CreateOrderTest {
 
     @InjectMocks
     private OrderService orderService;

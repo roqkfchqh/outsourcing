@@ -86,8 +86,8 @@ public class OrderService {
     public OrderResponseDto getOrder(AuthUser user, Long orderId) {
         Order order = findOrder(orderId);
 
-        //주문한사람 또는 가게 사장님인지 확인
-        if (!order.getUser().getId().equals(user.id()) && !orderRepository.existsOrderByOwner(
+        //주문한 사람도, 가게 사장님도 아닐 경우 throw error
+        if (!order.getUser().getId().equals(user.id()) || !orderRepository.existsOrderByOwner(
             orderId, user.id())) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
         }

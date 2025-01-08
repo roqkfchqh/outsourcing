@@ -74,4 +74,9 @@ public class Order extends Timestamped {
         this.status = status;
         this.orderMenus = orderMenus;
     }
+
+    public Order(User user, Status status) {
+        this.user = user;
+        this.status = status;
+    }
 }
