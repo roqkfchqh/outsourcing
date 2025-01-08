@@ -1,7 +1,10 @@
 package com.example.outsourcing.domain.user.service;
 
 import static com.example.outsourcing.domain.common.exception.base.ErrorCode.ALREADY_USED_EMAIL;
+import static com.example.outsourcing.domain.common.exception.base.ErrorCode.WRONG_EMAIL;
+import static com.example.outsourcing.domain.common.exception.base.ErrorCode.WRONG_PASSWORD;
 
+import com.example.outsourcing.domain.common.exception.AuthException;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.util.JwtUtil;
 import com.example.outsourcing.domain.common.util.PasswordEncoder;
@@ -38,9 +41,19 @@ public class UserService {
     User savedUser = userRepository.save(user);
   }
 
-  // public UserResponseDto login(UserRequestDto requestDto) {}
+  public String login(UserRequestDto requestDto) {
+    User user =
+        userRepository
+            .findByEmail(requestDto.getEmail())
+            .orElseThrow(() -> new AuthException(WRONG_EMAIL));
 
-  //  public UserResponseDto logout(UserRequestDto requestDto) {
+    if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+      throw new AuthException(WRONG_PASSWORD);
+    }
+    return jwtUtil.createToken(user.getId(), user.getEmail(), user.getUserRole());
+  }
+
+  //  public void logout(UserRequestDto requestDto) {
   //
   //  }
 }
