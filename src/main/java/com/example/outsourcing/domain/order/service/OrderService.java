@@ -28,8 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderMapper orderMapper;
-    private final OrderMenuMapper orderMenuMapper;
     private final ShopRepository shopRepository;
     private final OrderCartValidation validator;
     private final OrderCartService orderCartService;
@@ -57,10 +55,10 @@ public class OrderService {
 
         // 응답 DTO 반환
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
-            .map(orderMenuMapper::toDto)
+            .map(OrderMenuMapper::toDto)
             .toList();
 
-        return orderMapper.toDto(shop.getName(), order, orderMenusDto);
+        return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
     }
 
     @Transactional
@@ -100,10 +98,10 @@ public class OrderService {
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
 
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
-            .map(orderMenuMapper::toDto)
+            .map(OrderMenuMapper::toDto)
             .toList();
 
-        return orderMapper.toDto(shop.getName(), order, orderMenusDto);
+        return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
     }
 
     public List<OrderResponseDto> getOrdersByShop(AuthUser authUser, Long shopId) {
@@ -126,9 +124,9 @@ public class OrderService {
         return orders.stream()
             .map(order -> {
                 List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
-                    .map(orderMenuMapper::toDto)
+                    .map(OrderMenuMapper::toDto)
                     .toList();
-                return orderMapper.toDto(shop.getName(), order, orderMenusDto);
+                return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
             })
             .toList();
     }

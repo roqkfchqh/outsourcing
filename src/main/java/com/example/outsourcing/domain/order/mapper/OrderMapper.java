@@ -5,12 +5,10 @@ import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.entity.Order;
 import java.math.BigDecimal;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
-@Component
 public class OrderMapper {
 
-    public OrderResponseDto toDto(
+    public static OrderResponseDto toDto(
         String shopName,
         Order order,
         List<OrderMenuResponseDto> orderMenuResponseDto
@@ -26,7 +24,7 @@ public class OrderMapper {
         );
     }
 
-    private BigDecimal calculateTotalPrice(List<OrderMenuResponseDto> orderMenuResponseDto) {
+    private static BigDecimal calculateTotalPrice(List<OrderMenuResponseDto> orderMenuResponseDto) {
         return orderMenuResponseDto.stream()
             .map(menu -> menu.price().multiply(BigDecimal.valueOf(menu.quantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);

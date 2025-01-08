@@ -38,4 +38,9 @@ public class User extends Timestamped {
         user.userRole = authUser.userRole();
         return user;
     }
+
+    public User(Long id, String username) {
+        this.id = id;
+        this.username = username;
+    }
 }

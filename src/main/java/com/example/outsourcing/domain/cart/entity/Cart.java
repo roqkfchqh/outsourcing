@@ -19,5 +19,15 @@ public class Cart {
 
         private Long menuId;
         private int quantity;
+
+        public MenuItem(Long menuId, int quantity) {
+            this.menuId = menuId;
+            this.quantity = quantity;
+        }
+    }
+
+    public Cart(List<MenuItem> items) {
+        this.items = items;
+        this.totalQuantity = items.stream().mapToInt(MenuItem::getQuantity).sum();
     }
 }

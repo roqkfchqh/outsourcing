@@ -39,7 +39,7 @@ public class OrderCartValidation {
             throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
         }
 
-        // 가게 유효성 검사
+        // 가게 유효성 검사 // createOrder 끝으로 위임
         Shop shop = firstMenu.getShop();
         validateShop(shop);
 
@@ -47,9 +47,11 @@ public class OrderCartValidation {
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (Cart.MenuItem item : cart.getItems()) {
             Menu menu = menus.get(item.getMenuId());
+            //해당 메뉴가 유효한지 검증
             if (menu == null) {
                 throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
             }
+            //서로 다른 가게의 메뉴인지 검증
             if (!menu.getShop().getId().equals(shop.getId())) {
                 throw new InvalidRequestException(ErrorCode.DIFFERENT_SHOP);
             }

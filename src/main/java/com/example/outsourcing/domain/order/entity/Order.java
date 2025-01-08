@@ -56,7 +56,7 @@ public class Order extends Timestamped {
 
     public void addOrderMenu(OrderMenu orderMenu) {
         orderMenus.add(orderMenu);
-        //orderMenu.setOrder(this);
+        orderMenu.setOrder(this);
     }
 
     public void nextStatus() {
@@ -67,5 +67,11 @@ public class Order extends Timestamped {
             case COMPLETED -> throw new IllegalStateException("이미 완료된 주문입니다.");
             default -> throw new IllegalStateException("알 수 없는 상태입니다: " + this.status);
         }
+    }
+
+    public Order(User user, Status status, List<OrderMenu> orderMenus) {
+        this.user = user;
+        this.status = status;
+        this.orderMenus = orderMenus;
     }
 }
