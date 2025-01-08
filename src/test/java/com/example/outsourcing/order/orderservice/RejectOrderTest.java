@@ -29,10 +29,9 @@ public class RejectOrderTest {
     private OrderRepository orderRepository;
 
     @Test
-    void rejectOrder_ShouldDeleteOrder_WhenStatusIsPending() {
+    void rejectOrder_ShouldDeleteOrder_유효한_값() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
-
         Order order = new Order(User.fromAuthUser(user), Status.PENDING);
         when(orderRepository.findOrderByOwner(orderId, user.id())).thenReturn(Optional.of(order));
 
@@ -42,10 +41,9 @@ public class RejectOrderTest {
     }
 
     @Test
-    void rejectOrder_ShouldThrowException_WhenStatusIsNotPending() {
+    void rejectOrder_ShouldThrowException_주문보류중인_상태가_아닐때() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
-
         Order order = new Order(User.fromAuthUser(user), Status.ACCEPT);
         when(orderRepository.findOrderByOwner(orderId, user.id())).thenReturn(Optional.of(order));
 

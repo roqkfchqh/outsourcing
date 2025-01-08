@@ -37,10 +37,9 @@ public class GetOrderTest {
     private OrderRepository orderRepository;
 
     @Test
-    void getOrder_ShouldReturnOrderResponse_WhenUserIsAuthorized() {
+    void getOrder_ShouldReturnOrderResponse_유효한_값() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
         Long orderId = 1L;
-
         Shop shop = new Shop(1L, "Test Shop", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
             LocalTime.parse("18:00:00"), false);
         Menu menu = new Menu(1L, "Test Menu", BigDecimal.TEN, shop);
@@ -60,16 +59,12 @@ public class GetOrderTest {
     void getOrder_ShouldThrowForbiddenException_WhenUserIsUnauthorized() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
         Long orderId = 1L;
-
         Shop shop = new Shop(1L, "Test Shop", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
             LocalTime.parse("18:00:00"), false);
         Menu menu = new Menu(1L, "Test Menu", BigDecimal.TEN, shop);
         OrderMenu orderMenu = OrderMenu.of(menu, 2);
-
         Order order = new Order(User.fromAuthUser(user), Status.PENDING, List.of(orderMenu));
         orderMenu.assignOrder(order);
-
-        System.out.println(orderMenu.getMenu().getShop().getName());
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.existsOrderByOwner(orderId, user.id())).thenReturn(false);

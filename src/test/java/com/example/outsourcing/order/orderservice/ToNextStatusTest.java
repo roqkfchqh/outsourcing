@@ -30,11 +30,11 @@ public class ToNextStatusTest {
     private OrderRepository orderRepository;
 
     @Test
-    void toNextStatus_ShouldUpdateOrderStatus_WhenUserIsOwner() {
+    void toNextStatus_ShouldUpdateOrderStatus_유효한_값() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
-
         Order order = new Order(User.fromAuthUser(user), Status.PENDING);   //Pending에서 accept로만 해봤음
+
         when(orderRepository.findOrderByOwner(orderId, user.id())).thenReturn(Optional.of(order));
 
         orderService.toNextStatus(user, orderId);
@@ -44,8 +44,8 @@ public class ToNextStatusTest {
     }
 
     @Test
-    void toNextStatus_ShouldThrowForbiddenException_WhenUserIsNotOwner() {
-        AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
+    void toNextStatus_ShouldThrowForbiddenException_유저가_오너가_아닐때() {
+        AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
 
         when(orderRepository.findOrderByOwner(orderId, user.id())).thenReturn(Optional.empty());

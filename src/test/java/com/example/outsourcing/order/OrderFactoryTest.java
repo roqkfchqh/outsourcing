@@ -24,7 +24,7 @@ class OrderFactoryTest {
     private OrderFactory orderFactory;
 
     @Test
-    void createOrder_ShouldCreateOrder_WithValidInputs() {
+    void createOrder_ShouldCreateOrder_유효한_값() {
         User user = new User(1L, "Test User");
         Menu menu = new Menu(1L, "Test Menu", BigDecimal.valueOf(10),
             new Shop(1L, "Test Shop", BigDecimal.valueOf(50), null, null, false));

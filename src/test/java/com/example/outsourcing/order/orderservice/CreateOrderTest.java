@@ -53,24 +53,17 @@ class CreateOrderTest {
     private OrderRepository orderRepository;
 
     @Test
-    void createOrder_ShouldReturnOrderResponseDto_WhenAllValid() {
-        // Given
+    void createOrder_ShouldReturnOrderResponseDto_유효한_값() {
         AuthUser authUser = new AuthUser(1L, "Test User", UserRole.USER);
-
-        // cart & menu 초기화
         Cart.MenuItem menuItem = new Cart.MenuItem(1L, 2);
         Cart cart = new Cart(List.of(menuItem));
         Shop shop = new Shop(1L, "Test Shop", BigDecimal.valueOf(50), null, null, false);
         Menu menu = new Menu(1L, "Test Menu", BigDecimal.valueOf(10), shop);
-
-        // order & orderMenu 초기화
         OrderMenu orderMenu = new OrderMenu(menu, 2);
         Order order = new Order(
             User.fromAuthUser(authUser),
             Order.Status.PENDING,
             List.of(orderMenu));
-
-        // dto 초기화
         OrderMenuResponseDto orderMenuResponseDto = new OrderMenuResponseDto(
             "Test Menu",
             2,
@@ -83,15 +76,12 @@ class CreateOrderTest {
             BigDecimal.valueOf(20)
         );
 
-        // mock 동작 설정
         when(orderCartService.getCartData(authUser.id())).thenReturn(cart);
         when(orderCartValidation.validateCartAndReturnMenu(cart)).thenReturn(Map.of(1L, menu));
         when(orderFactory.createOrder(any(User.class), anyMap(), anyList())).thenReturn(order);
 
-        // When
         OrderResponseDto result = orderService.createOrder(authUser);
 
-        // Then
         assertNotNull(result);
         assertEquals(expectedResponse.shopName(), result.shopName());
         assertEquals(expectedResponse.totalPrice(), result.totalPrice());
@@ -99,25 +89,21 @@ class CreateOrderTest {
 
     @Test
     void createOrder_ShouldThrowException_장바구니가_비어있을때() {
-        // Given
         AuthUser authUser = new AuthUser(1L, "Test User", UserRole.USER);
-        when(orderCartService.getCartData(authUser.id())).thenThrow(new InvalidRequestException(
-            ErrorCode.CART_IS_EMPTY));
+        when(orderCartService.getCartData(authUser.id())).thenThrow(
+            new InvalidRequestException(ErrorCode.CART_IS_EMPTY));
 
-        // When & Then
         assertThrows(InvalidRequestException.class, () -> orderService.createOrder(authUser));
     }
 
     @Test
     void createOrder_ShouldThrowException_해당메뉴를_찾을수없을때() {
-        // Given
         AuthUser authUser = new AuthUser(1L, "Test User", UserRole.USER);
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 2)));
         when(orderCartService.getCartData(authUser.id())).thenReturn(cart);
-        when(orderCartValidation.validateCartAndReturnMenu(cart))
-            .thenThrow(new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+        when(orderCartValidation.validateCartAndReturnMenu(cart)).thenThrow(
+            new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
 
-        // When & Then
         assertThrows(InvalidRequestException.class, () -> orderService.createOrder(authUser));
     }
 }

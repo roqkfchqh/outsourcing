@@ -44,4 +44,16 @@ public class Shop extends Timestamped {
         this.close = close;
         this.isDeleted = isDeleted;
     }
+
+    public Shop(Long id, User user, String name, BigDecimal minOrderPrice, LocalTime open,
+        LocalTime close,
+        boolean isDeleted) {
+        this.id = id;
+        this.user = user;
+        this.name = name;
+        this.minOrderPrice = minOrderPrice;
+        this.open = open;
+        this.close = close;
+        this.isDeleted = isDeleted;
+    }
 }

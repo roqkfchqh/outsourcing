@@ -28,7 +28,7 @@ class OrderCartServiceTest {
     private CacheManager cacheManager;
 
     @Test
-    void getCartData_ShouldReturnCart_WhenCacheIsValid() {
+    void getCartData_ShouldReturnCart_유효한_값() {
         Cache mockCache = mock(Cache.class);
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 2)));
 

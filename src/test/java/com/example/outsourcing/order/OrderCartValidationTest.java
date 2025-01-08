@@ -33,7 +33,7 @@ class OrderCartValidationTest {
     private MenuRepository menuRepository;
 
     @Test
-    void validateCartAndReturnMenu_ShouldReturnMenus_WhenCartIsValid() {
+    void validateCartAndReturnMenu_ShouldReturnMenus_유효한_값() {
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 2)));
         Menu menu = new Menu(1L, "Test Menu", BigDecimal.valueOf(100),
             new Shop(
@@ -77,7 +77,6 @@ class OrderCartValidationTest {
             new Cart.MenuItem(1L, 2),
             new Cart.MenuItem(2L, 3)
         ));
-
         Menu menu1 = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
             new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
                 LocalTime.parse("18:00:00"), false));
@@ -94,7 +93,6 @@ class OrderCartValidationTest {
     @Test
     void validateCartAndReturnMenu_ShouldThrowException_최소주문금액보다_작을때() {
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 1)));
-
         Menu menu = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
             new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
                 LocalTime.parse("18:00:00"), false));
@@ -108,7 +106,6 @@ class OrderCartValidationTest {
     @Test
     void validateCartAndReturnMenu_ShouldThrowException_가게_영업시간이_아닐때() {
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 1)));
-
         Menu menu = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
             new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
                 LocalTime.parse("18:00:00"), false));
@@ -127,7 +124,6 @@ class OrderCartValidationTest {
     @Test
     void validateCartAndReturnMenu_ShouldThrowException_가게가_폐업했을때() {
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 1)));
-
         Menu menu = new Menu(1L, "Menu 1", BigDecimal.valueOf(10),
             new Shop(1L, "Shop 1", BigDecimal.valueOf(50), LocalTime.parse("09:00:00"),
                 LocalTime.parse("18:00:00"), true));
