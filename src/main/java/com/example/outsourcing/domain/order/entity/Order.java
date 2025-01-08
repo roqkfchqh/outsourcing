@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +48,13 @@ public class Order extends Timestamped {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
-    public static Order of(User user) {
+    private BigDecimal totalPrice;
+
+    public static Order of(User user, BigDecimal totalPrice) {
         Order order = new Order();
         order.user = user;
         order.status = Status.PENDING;
+        order.totalPrice = totalPrice;
         return order;
     }
 

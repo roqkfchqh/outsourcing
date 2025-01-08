@@ -6,6 +6,7 @@ import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
+import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
@@ -20,52 +21,39 @@ import org.springframework.stereotype.Component;
 public class OrderCartValidation {
 
     private final MenuRepository menuRepository;
+    private final ShopRepository shopRepository;
 
     public Map<Long, Menu> validateCartAndReturnMenu(Cart cart) {
-        if (cart.getItems().isEmpty()) {
-            throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
-        }
-
         // 메뉴 조회
         List<Long> menuIds = cart.getItems().stream()
             .map(Cart.MenuItem::getMenuId)
             .toList();
         Map<Long, Menu> menus = findMenusByIds(menuIds);
 
-        // 첫 번째 메뉴의 Shop 가져오기
-        Cart.MenuItem firstItem = cart.getItems().get(0);
-        Menu firstMenu = menus.get(firstItem.getMenuId());
-        if (firstMenu == null) {
-            throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
-        }
-
-        // 가게 유효성 검사 // createOrder 끝으로 위임
-        Shop shop = firstMenu.getShop();
-        validateShop(shop);
-
-        // 총 금액 계산 & 검증
-        BigDecimal totalAmount = BigDecimal.ZERO;
         for (Cart.MenuItem item : cart.getItems()) {
             Menu menu = menus.get(item.getMenuId());
             //해당 메뉴가 유효한지 검증
             if (menu == null) {
                 throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
             }
-            //서로 다른 가게의 메뉴인지 검증
-            if (!menu.getShop().getId().equals(shop.getId())) {
-                throw new InvalidRequestException(ErrorCode.DIFFERENT_SHOP);
-            }
-            totalAmount = totalAmount.add(
-                menu.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
-            );
         }
+        return menus;
+    }
 
-        // 최소 주문 금액 확인
-        if (totalAmount.compareTo(shop.getMinOrderPrice()) < 0) {
+    public Shop validateShop(Long shopId, BigDecimal totalPrice) {
+        Shop shop = shopRepository.findById(shopId)
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
+        LocalTime now = LocalTime.now();
+        if (now.isBefore(shop.getOpen()) || now.isAfter(shop.getClose())) {
+            throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
+        }
+        if (shop.isDeleted()) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
+        if (totalPrice.compareTo(shop.getMinOrderPrice()) < 0) {
             throw new InvalidRequestException(ErrorCode.MINIMUM_ORDER_NOT_MET);
         }
-
-        return menus;
+        return shop;
     }
 
     private Map<Long, Menu> findMenusByIds(List<Long> menuIds) {
@@ -73,14 +61,4 @@ public class OrderCartValidation {
         return menus.stream().collect(Collectors.toMap(Menu::getId, Function.identity()));
     }
 
-    private void validateShop(Shop shop) {
-        LocalTime now = LocalTime.now();
-        if (now.isBefore(shop.getOpen()) || now.isAfter(shop.getClose())) {
-            throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
-        }
-
-        if (shop.isDeleted()) {
-            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
-        }
-    }
 }

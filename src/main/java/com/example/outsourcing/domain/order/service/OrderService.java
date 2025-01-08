@@ -16,6 +16,7 @@ import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -36,28 +37,19 @@ public class OrderService {
     // 캐시(cart) 정보 받아와서 검증 후 주문 create
     @Transactional
     public OrderResponseDto createOrder(AuthUser user) {
-        // 캐시에서 장바구니 데이터 가져오기
         Cart cart = orderCartService.getCartData(user.id());
-
-        // 장바구니 유효성검증 후 메뉴 반환
         Map<Long, Menu> menus = validator.validateCartAndReturnMenu(cart);
+        BigDecimal totalPrice = getTotalPrice(cart, menus);
+        Shop shop = validator.validateShop(cart.getRecentShopId(), totalPrice);
+        Order order = orderFactory.createOrder(User.fromAuthUser(user), totalPrice, menus,
+            cart.getItems());
 
-        // 첫 번째 아이템으로 가게 정보 가져오기
-        Cart.MenuItem firstItem = cart.getItems().get(0);
-        Shop shop = menus.get(firstItem.getMenuId()).getShop();
-
-        // Order 생성
-        Order order = orderFactory.createOrder(User.fromAuthUser(user), menus, cart.getItems());
-
-        // 저장 & 캐시 제거
         orderRepository.save(order);
         orderCartService.evictCartData(user.id());
 
-        // 응답 DTO 반환
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
             .map(OrderMenuMapper::toDto)
             .toList();
-
         return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
     }
 
@@ -137,5 +129,16 @@ public class OrderService {
     private Order findOrder(Long orderId) {
         return orderRepository.findById(orderId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
+    private static BigDecimal getTotalPrice(Cart cart, Map<Long, Menu> menus) {
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (Cart.MenuItem item : cart.getItems()) {
+            Menu menu = menus.get(item.getMenuId());
+            totalPrice = totalPrice.add(
+                menu.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+            );
+        }
+        return totalPrice;
     }
 }
