@@ -18,18 +18,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User extends Timestamped {
 
-    public enum UserRole {OWNER, USER}
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String username;
     private String password;
     private String email;
-
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+
+    public User(String username, String password, String email, UserRole userRole) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.userRole = userRole;
+    }
 
     public static User fromAuthUser(AuthUser authUser) {
         User user = new User();
@@ -39,8 +42,8 @@ public class User extends Timestamped {
         return user;
     }
 
-    public User(Long id, String username) {
-        this.id = id;
-        this.username = username;
+    public enum UserRole {
+        OWNER,
+        USER
     }
 }

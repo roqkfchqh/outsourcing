@@ -23,6 +23,7 @@ public class JwtUtil {
 
     @Value("${jwt.secret.key}")
     private String secretKey;
+
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
@@ -45,15 +46,10 @@ public class JwtUtil {
     public String createToken(Long userId, String email, UserRole userRole) {
         Date date = new Date();
 
-        return BEARER_PREFIX +
-            Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .claim("email", email)
-                .claim("userRole", userRole)
-                .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-                .setIssuedAt(date)
-                .signWith(key, signatureAlgorithm)
-                .compact();
+        return BEARER_PREFIX + Jwts.builder().setSubject(String.valueOf(userId))
+            .claim("email", email).claim("userRole", userRole)
+            .setExpiration(new Date(date.getTime() + TOKEN_TIME)).setIssuedAt(date)
+            .signWith(key, signatureAlgorithm).compact();
     }
 
     public String substringToken(String tokenValue) {
@@ -71,11 +67,7 @@ public class JwtUtil {
 
     public Claims extractClaims(String token) {
         try {
-            return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         } catch (Exception e) {
             log.error("Failed to parse JWT token: {}", e.getMessage());
             throw new IllegalArgumentException("Invalid or expired JWT token");

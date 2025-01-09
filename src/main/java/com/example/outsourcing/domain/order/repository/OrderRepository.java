@@ -26,10 +26,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT CASE WHEN COUNT(o) > 0 THEN TRUE ELSE FALSE END " +
         "FROM Order o " +
-        "JOIN FETCH o.orderMenus om " +
-        "JOIN FETCH om.menu m " +
-        "JOIN FETCH m.shop s " +
-        "JOIN FETCH s.user u " +
+        "JOIN o.orderMenus om " +
+        "JOIN om.menu m " +
+        "JOIN m.shop s " +
+        "JOIN s.user u " +
         "WHERE o.id = :orderId AND u.id = :ownerId")
-    boolean existsOrderByOwner(@Param("orderId") Long orderId, @Param("orderId") Long ownerId);
+    boolean existsOrderByOwner(@Param("orderId") Long orderId, @Param("ownerId") Long ownerId);
+
 }
