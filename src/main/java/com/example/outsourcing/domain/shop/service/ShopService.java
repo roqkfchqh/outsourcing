@@ -11,6 +11,8 @@ import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
 import com.example.outsourcing.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,12 +68,50 @@ public class ShopService {
         shopRepository.save(shop);
     }
 
+    @Transactional
+    public void updateShopHours(AuthUser authUser, Long shopId, LocalTime open, LocalTime close) {
+        validateOwnership(authUser, shopId);
+        validateShopHours(open, close);
+
+        Shop shop = shopRepository.findById(shopId)
+            .orElseThrow(() -> new EntityNotFoundException("Shop not found."));
+
+        shop.setHours(open, close);
+        shopRepository.save(shop);
+    }
+
+    public boolean isShopOpen(AuthUser authUser, Long shopId) {
+        validateOwnership(authUser, shopId);
+
+        Shop shop = shopRepository.findById(shopId)
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.TODO_NOT_FOUND));
+
+        if (shop.getOpen() == null || shop.getClose() == null) {
+            throw new InvalidRequestException(ErrorCode.TODO_NOT_FOUND);
+        }
+
+        LocalTime now = LocalTime.now();
+        return now.isAfter(shop.getOpen()) && now.isBefore(shop.getClose());
+    }
+
     private void validateOwnership(AuthUser authUser, Long shopId) {
         Shop shop = shopRepository.findById(shopId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.TODO_NOT_FOUND));
 
         if (!shop.getUser().getId().equals(authUser.id())) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
+        }
+    }
+
+    private void validateShopHours(LocalTime open, LocalTime close) {
+        if (open == null || close == null) {
+            throw new IllegalArgumentException("Open and close times cannot be null.");
+        }
+        if (open.isAfter(close)) {
+            throw new IllegalArgumentException("Open time cannot be after close time.");
+        }
+        if (open.isBefore(LocalTime.of(6, 0)) || close.isAfter(LocalTime.of(23, 59))) {
+            throw new IllegalArgumentException("Shops can only operate between 06:00 and 23:59.");
         }
     }
 }

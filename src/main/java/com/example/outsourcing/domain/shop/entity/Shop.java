@@ -42,6 +42,25 @@ public class Shop extends Timestamped {
         this.minOrderPrice = minOrderPrice;
     }
 
+
+    // 영업 시간 설정
+    public void setHours(LocalTime open, LocalTime close) {
+        if (open.isAfter(close)) {
+            throw new IllegalArgumentException("Opening time cannot be after closing time.");
+        }
+        this.open = open;
+        this.close = close;
+    }
+
+    // 현재 영업 중인지 확인
+    public boolean isOpenNow() {
+        LocalTime now = LocalTime.now();
+        if (open.equals(close)) { // 24시간 영업
+            return true;
+        }
+        return now.isAfter(open) && now.isBefore(close);
+    }
+
     // 소프트 딜리트 메서드 추가
     public void markAsDeleted() {
         this.isDeleted = true;
