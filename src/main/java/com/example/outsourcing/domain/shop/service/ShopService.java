@@ -10,7 +10,6 @@ import com.example.outsourcing.domain.shop.dto.ShopUpdateRequestDto;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
-import com.example.outsourcing.domain.user.repository.UserRepository;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ShopService {
 
     private final ShopRepository shopRepository;
-    private final UserRepository userRepository;
     private final ShopMapper shopMapper;
     private final ShopMenuValidator validator;
 
@@ -35,9 +33,6 @@ public class ShopService {
         }
 
         User user = User.fromAuthUser(authUser);
-
-        Shop shop = new Shop(user, shopRequestDto.getName(), shopRequestDto.getMinOrderPrice());
-        Shop savedShop = shopRepository.save(shop);
 
         // Shop 객체 생성 및 저장 후 바로 DTO 변환
         return shopMapper.toResponseDto(
