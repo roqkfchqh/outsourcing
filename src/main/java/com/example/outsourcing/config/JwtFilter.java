@@ -1,7 +1,6 @@
 package com.example.outsourcing.config;
 
 import com.example.outsourcing.domain.common.util.JwtUtil;
-import com.example.outsourcing.domain.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -17,11 +16,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.PatternMatchUtils;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter implements Filter {
 
+    private static final String[] WHITE_LIST = {"/", "/auth/register", "/auth/login"};
     private final JwtUtil jwtUtil;
 
     @Override
@@ -44,7 +45,7 @@ public class JwtFilter implements Filter {
 
         // startsWith는 특정 문자열로 시작되는지 체크하는 것이므로 user변수가 /user로 시작하는 문자열이라면 chain.doFilter(request,
         // response)를 사용하여 현재 처리 필터를 마치고 요청을 다음필터로 넘긴다. 이후 return하여 종료
-        if (url.startsWith("/auth")) {
+        if (isWhiteList(url)) {
             chain.doFilter(request, response);
             return;
         }
@@ -60,7 +61,7 @@ public class JwtFilter implements Filter {
             return;
         }
 
-        if (UserService.expiredTokenSet.contains(bearerJwt)) {
+        if (JwtUtil.expiredTokenSet.contains(bearerJwt)) {
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "토큰이 유효하지 않습니다.");
             return;
         }
@@ -106,5 +107,9 @@ public class JwtFilter implements Filter {
     @Override
     public void destroy() {
         Filter.super.destroy();
+    }
+
+    private boolean isWhiteList(String requsetURI) {
+        return PatternMatchUtils.simpleMatch(WHITE_LIST, requsetURI);
     }
 }

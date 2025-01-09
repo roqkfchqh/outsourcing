@@ -27,6 +27,7 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
+
     @PostMapping("/items/{menuId}")
     public ResponseEntity<Cart> addItemToCart(@Auth AuthUser authUser, @PathVariable Long menuId) {
         Cart cart = cartService.addItemToCart(authUser, menuId);

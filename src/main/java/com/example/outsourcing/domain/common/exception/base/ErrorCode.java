@@ -43,6 +43,7 @@ public enum ErrorCode {
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    FORBIDDEN_ROLE(HttpStatus.FORBIDDEN, "사용자의 권한이 존재하지 않습니다."),
 
     //server
     CACHING_WRAPPER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,

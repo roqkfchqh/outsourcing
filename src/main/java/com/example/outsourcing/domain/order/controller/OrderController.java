@@ -1,6 +1,7 @@
 package com.example.outsourcing.domain.order.controller;
 
 import com.example.outsourcing.domain.common.annotation.Auth;
+import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.service.OrderService;
@@ -50,6 +51,7 @@ public class OrderController {
     /**
      * 주문 상태 조회
      */
+
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponseDto> getOrder(
         @Auth AuthUser authUser,
@@ -74,6 +76,7 @@ public class OrderController {
     /**
      * 사장님이 가게의 모든 주문 요청 조회
      */
+    @UserCheck
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> getOrdersByShop(
         @Auth AuthUser authUser,

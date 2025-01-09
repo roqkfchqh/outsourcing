@@ -9,6 +9,8 @@ import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long TOKEN_TIME = 60 * 60 * 1000L;
+    public static final Set<String> expiredTokenSet = new HashSet<>();
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -67,7 +70,8 @@ public class JwtUtil {
 
     public Claims extractClaims(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token)
+                .getBody();
         } catch (Exception e) {
             log.error("Failed to parse JWT token: {}", e.getMessage());
             throw new IllegalArgumentException("Invalid or expired JWT token");

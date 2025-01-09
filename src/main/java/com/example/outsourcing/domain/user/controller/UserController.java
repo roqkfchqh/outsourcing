@@ -1,5 +1,6 @@
 package com.example.outsourcing.domain.user.controller;
 
+import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.user.dto.LoginRequestDto;
 import com.example.outsourcing.domain.user.dto.SignUpRequestDto;
 import com.example.outsourcing.domain.user.dto.UserResponseDto;
@@ -26,12 +27,14 @@ public class UserController {
         return ResponseEntity.ok("회원가입에 성공했습니다.");
     }
 
+
     @PostMapping("/login")
     public UserResponseDto login(@Valid @RequestBody LoginRequestDto requestDto) {
         String token = userService.login(requestDto);
         return new UserResponseDto(token, "로그인에 성공했습니다.");
     }
 
+    @UserCheck
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
         userService.logout(token);

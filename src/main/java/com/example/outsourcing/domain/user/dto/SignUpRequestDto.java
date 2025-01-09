@@ -3,6 +3,7 @@ package com.example.outsourcing.domain.user.dto;
 import com.example.outsourcing.domain.user.entity.User.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,5 +20,6 @@ public class SignUpRequestDto {
     @Email
     @NotBlank
     private String email;
+    @NotNull //Enum값은 @NotBlank를 사용하면 인식이 아예 안된다.
     private UserRole userRole;
 }

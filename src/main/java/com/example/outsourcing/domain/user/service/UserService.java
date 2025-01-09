@@ -1,7 +1,6 @@
 package com.example.outsourcing.domain.user.service;
 
 import static com.example.outsourcing.domain.common.exception.base.ErrorCode.ALREADY_USED_EMAIL;
-import static com.example.outsourcing.domain.common.exception.base.ErrorCode.INVALID_TOKEN;
 import static com.example.outsourcing.domain.common.exception.base.ErrorCode.WRONG_EMAIL;
 import static com.example.outsourcing.domain.common.exception.base.ErrorCode.WRONG_PASSWORD;
 
@@ -14,8 +13,6 @@ import com.example.outsourcing.domain.user.dto.SignUpRequestDto;
 import com.example.outsourcing.domain.user.entity.User;
 import com.example.outsourcing.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +20,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
-    public static final Set<String> expiredTokenSet = new HashSet<>(); // 별도의 클래스에서 관리할 것
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -56,10 +53,7 @@ public class UserService {
     }
 
     public void logout(String token) {
-        if (token == null) {
-            throw new AuthException(INVALID_TOKEN);
-        }
-        expiredTokenSet.add(token);
+        JwtUtil.expiredTokenSet.add(token);
     }
 
 }
