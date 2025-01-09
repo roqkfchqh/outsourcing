@@ -11,7 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.sql.Time;
+import java.time.LocalTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,10 +28,28 @@ public class Shop extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+    private String name;
 
     private BigDecimal minOrderPrice = BigDecimal.ZERO;
-    private Time open;
-    private Time close;
+    private LocalTime open;
+    private LocalTime close;
     private boolean isDeleted;
 
+    // 커스텀 생성자 추가
+    public Shop(User user, String name, BigDecimal minOrderPrice) {
+        this.user = user;
+        this.name = name;
+        this.minOrderPrice = minOrderPrice;
+    }
+
+    // 소프트 딜리트 메서드 추가
+    public void markAsDeleted() {
+        this.isDeleted = true;
+    }
+
+    //업데이트 메서드 추가
+    public void update(String name, BigDecimal minOrderPrice) {
+        this.name = name;
+        this.minOrderPrice = minOrderPrice;
+    }
 }
