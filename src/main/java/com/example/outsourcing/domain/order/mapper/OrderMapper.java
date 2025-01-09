@@ -15,7 +15,7 @@ public class OrderMapper {
 
         return new OrderResponseDto(
             shopName,
-            order.getUser().getUsername(),
+            order.getUser().getId(),
             order.getStatus(),
             orderMenuResponseDto,
             order.getTotalPrice(),
