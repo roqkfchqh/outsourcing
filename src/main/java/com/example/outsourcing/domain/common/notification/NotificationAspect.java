@@ -8,6 +8,7 @@ import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -30,9 +31,7 @@ public class NotificationAspect {
         webSocketService.sendNotificationToUser(order.getUser().getId(), message);
     }
 
-    @AfterReturning(
-        pointcut = "execution(* com.example.outsourcing.domain.order.service.OrderService.rejectOrder(..)) && args(user, orderId)",
-        argNames = "user,orderId")
+    @After(value = "execution(* com.example.outsourcing.domain.order.service.OrderService.rejectOrder(..)) && args(user, orderId)", argNames = "user,orderId")
     public void afterOrderRejected(AuthUser user, Long orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow();
         String message = "주문이 거절되었습니다. \n일시: " + order.getUpdatedAt().format(formatter);
