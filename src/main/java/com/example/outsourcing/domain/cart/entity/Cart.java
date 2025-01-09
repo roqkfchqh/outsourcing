@@ -31,18 +31,12 @@ public class Cart {
         }
         recentShopId = shopId;
 
-        items.stream()
-            .filter(item -> item.getMenuId().equals(menuId))
-            .findFirst()
-            .ifPresentOrElse(
-                MenuItem::increase,
-                () -> items.add(new MenuItem(menuId))
-            );
+        items.stream().filter(item -> item.getMenuId().equals(menuId)).findFirst()
+            .ifPresentOrElse(MenuItem::increase, () -> items.add(new MenuItem(menuId)));
     }
 
     public void removeItem(Long menuItemId) {
-        MenuItem menuItem = items.stream()
-            .filter(item -> item.getMenuId().equals(menuItemId))
+        MenuItem menuItem = items.stream().filter(item -> item.getMenuId().equals(menuItemId))
             .findFirst()
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.CART_ITEM_NOT_FOUND));
 
