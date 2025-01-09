@@ -39,4 +39,21 @@ public class Review extends Timestamped {
 
     private String content;
     private int rating;
+
+    public Review(Long reviewId, User user, String content, int rating) {
+        this.id = reviewId;
+        this.user = user;
+        this.content = content;
+        this.rating = rating;
+    }
+
+    public static Review of(User user, Shop shop, Order order, String content, int rating) {
+        Review review = new Review();
+        review.user = user;
+        review.shop = shop;
+        review.order = order;
+        review.content = content;
+        review.rating = rating;
+        return review;
+    }
 }
