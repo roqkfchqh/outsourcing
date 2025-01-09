@@ -28,13 +28,27 @@ public class Menu {
 
     private String name;
     private String description;
+
     private BigDecimal price = BigDecimal.ZERO;
+
     private boolean isDeleted = false;
 
-    public Menu(Long id, String name, BigDecimal price, Shop shop) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
+    // 커스텀 생성자 추가
+    public Menu(Shop shop, String name, String description, BigDecimal price) {
         this.shop = shop;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+    }
+
+    // 소프트 딜리트 메서드
+    public void markAsDeleted() {
+        this.isDeleted = true;
+    }
+
+    public void update(String name, String description, BigDecimal price) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
     }
 }

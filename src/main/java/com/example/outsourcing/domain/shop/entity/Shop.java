@@ -1,6 +1,8 @@
 package com.example.outsourcing.domain.shop.entity;
 
 import com.example.outsourcing.domain.common.entity.Timestamped;
+import com.example.outsourcing.domain.common.exception.InvalidRequestException;
+import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,32 +30,41 @@ public class Shop extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
     private String name;
+
     private BigDecimal minOrderPrice = BigDecimal.ZERO;
     private LocalTime open;
     private LocalTime close;
     private boolean isDeleted;
 
-    public Shop(Long id, String name, BigDecimal minOrderPrice, LocalTime open, LocalTime close,
-        boolean isDeleted) {
-        this.id = id;
-        this.name = name;
-        this.minOrderPrice = minOrderPrice;
-        this.open = open;
-        this.close = close;
-        this.isDeleted = isDeleted;
-    }
-
-    public Shop(Long id, User user, String name, BigDecimal minOrderPrice, LocalTime open,
-        LocalTime close,
-        boolean isDeleted) {
-        this.id = id;
+    // 커스텀 생성자 추가
+    public Shop(User user, String name, BigDecimal minOrderPrice) {
         this.user = user;
         this.name = name;
         this.minOrderPrice = minOrderPrice;
+    }
+
+    // 가게 이름 업데이트
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    // 최소 주문 금액 업데이트
+    public void updateMinOrderPrice(BigDecimal minOrderPrice) {
+        this.minOrderPrice = minOrderPrice;
+    }
+
+    // 영업 시간 설정
+    public void setHours(LocalTime open, LocalTime close) {
+        if (open.isAfter(close)) {
+            throw new InvalidRequestException(ErrorCode.SHOP_HOURS_INVALID);
+        }
         this.open = open;
         this.close = close;
-        this.isDeleted = isDeleted;
+    }
+
+    // 소프트 딜리트 메서드 추가
+    public void markAsDeleted() {
+        this.isDeleted = true;
     }
 }
