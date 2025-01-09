@@ -40,6 +40,9 @@ dependencies {
     implementation 'at.favre.lib:bcrypt:0.10.2'
 
     //데이터베이스(영빈)
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 
     //데이터베이스(주양 - mySql)
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -87,11 +90,16 @@ sourceSets {
     }
 }
 
-//build 시 test 안함
-tasks.withType(Test).configureEach {
-    useJUnitPlatform()
-    enabled = false
+////build 시 test 안함
+//tasks.withType(Test).configureEach {
+//    useJUnitPlatform()
+//    enabled = false
+//}
+
+tasks.test {
+    useJUnitPlatform() // JUnit 5 사용
 }
+
 
 //querydsl 설정
 clean { delete file('src/main/generated') }

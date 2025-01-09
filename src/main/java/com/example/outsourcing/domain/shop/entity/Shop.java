@@ -11,7 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.sql.Time;
+import java.time.LocalTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,9 +29,31 @@ public class Shop extends Timestamped {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private String name;
     private BigDecimal minOrderPrice = BigDecimal.ZERO;
-    private Time open;
-    private Time close;
+    private LocalTime open;
+    private LocalTime close;
     private boolean isDeleted;
 
+    public Shop(Long id, String name, BigDecimal minOrderPrice, LocalTime open, LocalTime close,
+        boolean isDeleted) {
+        this.id = id;
+        this.name = name;
+        this.minOrderPrice = minOrderPrice;
+        this.open = open;
+        this.close = close;
+        this.isDeleted = isDeleted;
+    }
+
+    public Shop(Long id, User user, String name, BigDecimal minOrderPrice, LocalTime open,
+        LocalTime close,
+        boolean isDeleted) {
+        this.id = id;
+        this.user = user;
+        this.name = name;
+        this.minOrderPrice = minOrderPrice;
+        this.open = open;
+        this.close = close;
+        this.isDeleted = isDeleted;
+    }
 }
