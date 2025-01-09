@@ -1,6 +1,7 @@
 package com.example.outsourcing.config;
 
 import com.example.outsourcing.domain.common.util.JwtUtil;
+import com.example.outsourcing.domain.user.entity.User.UserRole;
 import com.example.outsourcing.domain.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -91,7 +92,9 @@ public class JwtFilter implements Filter {
       */
             httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
             httpRequest.setAttribute("email", claims.get("email"));
-            httpRequest.setAttribute("userRole", claims.get("userRole"));
+            String userRoleString = claims.get("userRole").toString();
+            UserRole userRole = UserRole.valueOf(userRoleString);
+            httpRequest.setAttribute("userRole", userRole);
 
             chain.doFilter(request, response);
         } catch (SecurityException | MalformedJwtException e) {
