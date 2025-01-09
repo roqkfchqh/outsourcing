@@ -55,13 +55,14 @@ public class OrderService {
     }
 
     @Transactional
-    public void toNextStatus(AuthUser user, Long orderId) {
+    public Order toNextStatus(AuthUser user, Long orderId) {
         // 해당 주문을 받은 가게의 사장님인지 확인
         Order order = orderRepository.findOrderByOwner(orderId, user.id())
             .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
 
         // 다음 상태로 변경
         order.nextStatus();
+        return order;
     }
 
     @Transactional
