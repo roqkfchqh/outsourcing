@@ -11,7 +11,6 @@ import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
 import com.example.outsourcing.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +27,7 @@ public class ShopService {
 
     @Transactional
     public ShopResponseDto addShop(AuthUser authUser, ShopRequestDto shopRequestDto) {
+        // 사용자당 최대 가게 수 확인
         if (shopRepository.existsByUserIdAndIsDeletedFalse(authUser.id())) {
             throw new InvalidRequestException(ErrorCode.ALREADY_USED_EMAIL);
         }
@@ -38,7 +38,7 @@ public class ShopService {
         Shop shop = new Shop(user, shopRequestDto.getName(), shopRequestDto.getMinOrderPrice());
         Shop savedShop = shopRepository.save(shop);
 
-        // Mapper 사용
+        // Mapper를 사용하여 ResponseDto로 변환
         return shopMapper.toResponseDto(savedShop);
     }
 
@@ -48,12 +48,12 @@ public class ShopService {
         validateOwnership(authUser, shopId);
 
         Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.COMMENT_NOT_FOUND));
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
 
         shop.update(shopRequestDto.getName(), shopRequestDto.getMinOrderPrice());
         Shop updatedShop = shopRepository.save(shop);
 
-        // Mapper 사용
+        // Mapper를 사용하여 ResponseDto로 변환
         return shopMapper.toResponseDto(updatedShop);
     }
 
@@ -62,7 +62,7 @@ public class ShopService {
         validateOwnership(authUser, shopId);
 
         Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.TODO_NOT_FOUND));
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
 
         shop.markAsDeleted();
         shopRepository.save(shop);
@@ -74,7 +74,7 @@ public class ShopService {
         validateShopHours(open, close);
 
         Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new EntityNotFoundException("Shop not found."));
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
 
         shop.setHours(open, close);
         shopRepository.save(shop);
@@ -84,10 +84,10 @@ public class ShopService {
         validateOwnership(authUser, shopId);
 
         Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.TODO_NOT_FOUND));
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
 
         if (shop.getOpen() == null || shop.getClose() == null) {
-            throw new InvalidRequestException(ErrorCode.TODO_NOT_FOUND);
+            throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
         }
 
         LocalTime now = LocalTime.now();
@@ -96,7 +96,7 @@ public class ShopService {
 
     private void validateOwnership(AuthUser authUser, Long shopId) {
         Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.TODO_NOT_FOUND));
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
 
         if (!shop.getUser().getId().equals(authUser.id())) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
@@ -105,13 +105,13 @@ public class ShopService {
 
     private void validateShopHours(LocalTime open, LocalTime close) {
         if (open == null || close == null) {
-            throw new IllegalArgumentException("Open and close times cannot be null.");
+            throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
         }
         if (open.isAfter(close)) {
-            throw new IllegalArgumentException("Open time cannot be after close time.");
+            throw new InvalidRequestException(ErrorCode.CANNOT_CHANGE_STATUS);
         }
         if (open.isBefore(LocalTime.of(6, 0)) || close.isAfter(LocalTime.of(23, 59))) {
-            throw new IllegalArgumentException("Shops can only operate between 06:00 and 23:59.");
+            throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
         }
     }
 }

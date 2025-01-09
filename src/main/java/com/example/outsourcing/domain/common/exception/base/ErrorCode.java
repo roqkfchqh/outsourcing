@@ -40,6 +40,7 @@ public enum ErrorCode {
     ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "해당 주문에 대한 리뷰가 이미 존재합니다."),
     NOT_COMPLETED_ORDER(HttpStatus.BAD_REQUEST, "완료 처리된 주문이 아닙니다."),
     REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "완료 처리된 주문이 아닙니다."),
+    MENU_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "같은 이름의 메뉴가 이미 존재합니다."),
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),

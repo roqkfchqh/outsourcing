@@ -25,34 +25,37 @@ public class MenuController {
 
     private final MenuService menuService;
 
-    //메뉴 추가
+    //메뉴 추가 요청 처리
     @PostMapping("/menus")
     public MenuResponseDto addMenu(
-        @RequestBody @Valid MenuRequestDto menuRequestDto,
-        @Auth AuthUser authUser) {
+        @RequestBody @Valid MenuRequestDto menuRequestDto, //요청 본문의 메뉴 데이터
+        @Auth AuthUser authUser) { // 인증된 사용자 정보
         return menuService.addMenu(authUser, menuRequestDto);
     }
 
-    // 특정 가게의 모든 메뉴 조회
+    // 특정 가게의 모든 메뉴 조회 요청 처리
     @GetMapping("/menus")
-    public List<MenuResponseDto> getAllMenus(@RequestParam Long shopId, @Auth AuthUser authUser) {
+    public List<MenuResponseDto> getAllMenus(
+        @RequestParam Long shopId, // 조회 대상 가게 ID
+        @Auth AuthUser authUser) { // 인증된 사용자 정보
         return menuService.getAllMenusByShop(authUser, shopId);
     }
 
-    //특정 메뉴 정보 수정
+    //특정 메뉴 정보 수정 요청 처리
     @PatchMapping("/menus/{menuId}")
     public MenuResponseDto updateMenu(
-        @PathVariable Long menuId,
-        @RequestBody @Valid MenuRequestDto menuRequestDto,
-        @Auth AuthUser authUser) {
+        @PathVariable Long menuId, //수정 대상 메뉴 ID
+        @RequestBody @Valid MenuRequestDto menuRequestDto, //수정할 메뉴 데이터
+        @Auth AuthUser authUser) { // 인증된 사용자 정보
         return menuService.updateMenu(authUser, menuId, menuRequestDto);
     }
 
+    //특정 메뉴 삭제 요청 처리 (소프트 딜리트)
     @DeleteMapping("/menus/{menuId}")
     public void deleteMenu(
-        @RequestParam Long shopId,
-        @PathVariable Long menuId,
-        @Auth AuthUser authUser) {
+        @RequestParam Long shopId, //삭제 대상 메뉴가 속한 가게 ID
+        @PathVariable Long menuId, // 삭제 대상 메뉴 ID
+        @Auth AuthUser authUser) { // 인증된 사용자 정보
         menuService.softDeleteMenu(authUser, shopId, menuId);
     }
 }
