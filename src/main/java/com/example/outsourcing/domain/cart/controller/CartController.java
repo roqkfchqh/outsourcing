@@ -18,41 +18,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/carts")
 public class CartController {
 
-	private final CartService cartService;
+    private final CartService cartService;
 
-	@GetMapping("/items")
-	public ResponseEntity<Cart> getCart(@Auth AuthUser authUser) {
-		Cart cart = cartService.getCart(authUser);
+    @GetMapping("/items")
+    public ResponseEntity<Cart> getCart(@Auth AuthUser authUser) {
+        Cart cart = cartService.getCart(authUser);
 
-		return ResponseEntity.ok(cart);
-	}
+        return ResponseEntity.ok(cart);
+    }
 
-	@PostMapping("/items/{menuId}")
-	public ResponseEntity<Cart> addItemToCart(
-		@Auth AuthUser authUser,
-		@PathVariable Long menuId
-	) {
-		Cart cart = cartService.addItemToCart(authUser, menuId);
+    @PostMapping("/items/{menuId}")
+    public ResponseEntity<Cart> addItemToCart(@Auth AuthUser authUser, @PathVariable Long menuId) {
+        Cart cart = cartService.addItemToCart(authUser, menuId);
 
-		return ResponseEntity.ok(cart);
-	}
+        return ResponseEntity.ok(cart);
+    }
 
-	@DeleteMapping("/items/{menuId}")
-	public ResponseEntity<Cart> removeItemFromCart(
-		@Auth AuthUser authUser,
-		@PathVariable Long menuId
-	) {
-		Cart cart = cartService.removeItemFromCart(authUser, menuId);
+    @DeleteMapping("/items/{menuId}")
+    public ResponseEntity<Cart> removeItemFromCart(@Auth AuthUser authUser,
+        @PathVariable Long menuId) {
+        Cart cart = cartService.removeItemFromCart(authUser, menuId);
 
-		return ResponseEntity.ok(cart);
-	}
+        return ResponseEntity.ok(cart);
+    }
 
-	@DeleteMapping("/items")
-	public ResponseEntity<Void> clearCart(
-		@Auth AuthUser authUser
-	) {
-		cartService.clearCart(authUser);
+    @DeleteMapping("/items")
+    public ResponseEntity<Void> clearCart(@Auth AuthUser authUser) {
+        cartService.clearCart(authUser);
 
-		return ResponseEntity.noContent().build();
-	}
+        return ResponseEntity.noContent().build();
+    }
 }
