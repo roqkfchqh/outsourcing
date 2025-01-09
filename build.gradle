@@ -80,6 +80,13 @@ dependencies {
 
     //AssertJ
     testImplementation 'org.assertj:assertj-core:3.24.2'
+
+    //WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    //AOP
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 }
 
 sourceSets {

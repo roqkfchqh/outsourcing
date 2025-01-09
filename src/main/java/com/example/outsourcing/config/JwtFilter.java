@@ -1,6 +1,7 @@
 package com.example.outsourcing.config;
 
 import com.example.outsourcing.domain.common.util.JwtUtil;
+import com.example.outsourcing.domain.user.entity.User.UserRole;
 import com.example.outsourcing.domain.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -49,6 +50,12 @@ public class JwtFilter implements Filter {
             return;
         }
 
+        // websocket 검증
+        if (url.startsWith("/ws")) {
+            processWebSocketAuthentication(httpRequest, httpResponse, chain);
+            return;
+        }
+
         // httpRequest.getHeader는 클라이언트 측 정보습득을 위해 사용, Authorization는 HttpServlet의 헤더 중, Jwt 토큰을 가져온다.
         String bearerJwt = httpRequest.getHeader("Authorization");
 
@@ -85,7 +92,9 @@ public class JwtFilter implements Filter {
       */
             httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
             httpRequest.setAttribute("email", claims.get("email"));
-            httpRequest.setAttribute("userRole", claims.get("userRole"));
+            String userRoleString = claims.get("userRole").toString();
+            UserRole userRole = UserRole.valueOf(userRoleString);
+            httpRequest.setAttribute("userRole", userRole);
 
             chain.doFilter(request, response);
         } catch (SecurityException | MalformedJwtException e) {
@@ -107,4 +116,18 @@ public class JwtFilter implements Filter {
     public void destroy() {
         Filter.super.destroy();
     }
+
+    private void processWebSocketAuthentication(HttpServletRequest httpRequest,
+        HttpServletResponse httpResponse, FilterChain chain)
+        throws IOException, ServletException {
+        String token = httpRequest.getParameter("token");
+        if (token == null || token.isEmpty()) {
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "웹소켓 토큰을 찾을 수 없습니다.");
+            return;
+        }
+        Claims claims = jwtUtil.extractClaims(jwtUtil.substringToken(token));
+        httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
+        chain.doFilter(httpRequest, httpResponse);
+    }
+
 }

@@ -8,14 +8,34 @@ import java.util.List;
 public class OrderMapper {
 
     public static OrderResponseDto toDto(
+        Long ownerId,
         String shopName,
         Order order,
         List<OrderMenuResponseDto> orderMenuResponseDto
     ) {
 
         return new OrderResponseDto(
+            ownerId,
             shopName,
-            order.getUser().getUsername(),
+            order.getUser().getId(),
+            order.getStatus(),
+            orderMenuResponseDto,
+            order.getTotalPrice(),
+            order.getCreatedAt(),
+            order.getUpdatedAt()
+        );
+    }
+
+    public static OrderResponseDto toDto(
+        String shopName,
+        Order order,
+        List<OrderMenuResponseDto> orderMenuResponseDto
+    ) {
+
+        return new OrderResponseDto(
+            null,
+            shopName,
+            order.getUser().getId(),
             order.getStatus(),
             orderMenuResponseDto,
             order.getTotalPrice(),

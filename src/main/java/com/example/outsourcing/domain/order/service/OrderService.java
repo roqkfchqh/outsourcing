@@ -51,21 +51,22 @@ public class OrderService {
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
             .map(OrderMenuMapper::toDto)
             .toList();
-        return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
+        return OrderMapper.toDto(shop.getUser().getId(), shop.getName(), order, orderMenusDto);
     }
 
     @Transactional
-    public void toNextStatus(AuthUser user, Long orderId) {
+    public Order toNextStatus(AuthUser user, Long orderId) {
         // 해당 주문을 받은 가게의 사장님인지 확인
         Order order = orderRepository.findOrderByOwner(orderId, user.id())
             .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
 
         // 다음 상태로 변경
         order.nextStatus();
+        return order;
     }
 
     @Transactional
-    public void rejectOrder(AuthUser user, Long orderId) {
+    public Long rejectOrder(AuthUser user, Long orderId) {
         // 해당 주문을 받은 가게의 사장님인지 확인
         Order order = orderRepository.findOrderByOwner(orderId, user.id())
             .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
@@ -73,7 +74,9 @@ public class OrderService {
         if (order.getStatus() != Status.PENDING) {
             throw new InvalidRequestException(ErrorCode.CANNOT_CHANGE_STATUS);
         }
+        Long userId = order.getUser().getId();
         orderRepository.deleteById(orderId);
+        return userId;
     }
 
     public OrderResponseDto getOrder(AuthUser user, Long orderId) {
