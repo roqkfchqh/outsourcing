@@ -1,6 +1,8 @@
 package com.example.outsourcing.domain.shop.entity;
 
 import com.example.outsourcing.domain.common.entity.Timestamped;
+import com.example.outsourcing.domain.common.exception.InvalidRequestException;
+import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.user.entity.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,33 +44,27 @@ public class Shop extends Timestamped {
         this.minOrderPrice = minOrderPrice;
     }
 
+    // 가게 이름 업데이트
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    // 최소 주문 금액 업데이트
+    public void updateMinOrderPrice(BigDecimal minOrderPrice) {
+        this.minOrderPrice = minOrderPrice;
+    }
 
     // 영업 시간 설정
     public void setHours(LocalTime open, LocalTime close) {
         if (open.isAfter(close)) {
-            throw new IllegalArgumentException("Opening time cannot be after closing time.");
+            throw new InvalidRequestException(ErrorCode.SHOP_HOURS_INVALID);
         }
         this.open = open;
         this.close = close;
     }
 
-    // 현재 영업 중인지 확인
-    public boolean isOpenNow() {
-        LocalTime now = LocalTime.now();
-        if (open.equals(close)) { // 24시간 영업
-            return true;
-        }
-        return now.isAfter(open) && now.isBefore(close);
-    }
-
     // 소프트 딜리트 메서드 추가
     public void markAsDeleted() {
         this.isDeleted = true;
-    }
-
-    //업데이트 메서드 추가
-    public void update(String name, BigDecimal minOrderPrice) {
-        this.name = name;
-        this.minOrderPrice = minOrderPrice;
     }
 }

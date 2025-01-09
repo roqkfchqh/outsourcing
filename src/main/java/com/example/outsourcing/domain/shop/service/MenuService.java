@@ -1,7 +1,6 @@
 package com.example.outsourcing.domain.shop.service;
 
 import com.example.outsourcing.domain.common.dto.AuthUser;
-import com.example.outsourcing.domain.common.exception.ForbiddenException;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.shop.Mapper.MenuMapper;
@@ -10,7 +9,6 @@ import com.example.outsourcing.domain.shop.dto.MenuResponseDto;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
-import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -23,31 +21,32 @@ import org.springframework.transaction.annotation.Transactional;
 public class MenuService {
 
     private final MenuRepository menuRepository;
-    private final ShopRepository shopRepository;
     private final MenuMapper menuMapper;
+    private final ShopMenuValidator validator;
 
     @Transactional
-    public MenuResponseDto addMenu(AuthUser authUser, MenuRequestDto menuRequestDto) {
-        validateOwnership(authUser, menuRequestDto.getShopId());
+    public MenuResponseDto addMenu(AuthUser authUser,
+        MenuRequestDto menuRequestDto, Long shopId) {
+        validator.validateOwnership(authUser.id(), shopId);
 
         // 중복된 메뉴 이름 확인
-        if (menuRepository.existsByShopIdAndNameAndIsDeletedFalse(menuRequestDto.getShopId(),
+        if (menuRepository.existsByShopIdAndNameAndIsDeletedFalse(shopId,
             menuRequestDto.getName())) {
             throw new InvalidRequestException(ErrorCode.MENU_ALREADY_EXISTS); // 중복 메뉴 처리
         }
 
-        Shop shop = shopRepository.findById(menuRequestDto.getShopId())
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND)); // 가게 존재 여부
-        Menu menu = new Menu(shop, menuRequestDto.getName(), menuRequestDto.getDescription(),
-            menuRequestDto.getPrice());
-        Menu savedMenu = menuRepository.save(menu);
-
+        Shop shop = validator.findShopByIdOrThrow(shopId); // 가게 존재 여부
         // Mapper를 사용하여 ResponseDto로 변환
-        return menuMapper.toResponseDto(savedMenu);
+        return menuMapper.toResponseDto(
+            menuRepository.save(
+                new Menu(shop, menuRequestDto.getName(), menuRequestDto.getDescription(),
+                    menuRequestDto.getPrice())
+            )
+        );
     }
 
     public List<MenuResponseDto> getAllMenusByShop(AuthUser authUser, Long shopId) {
-        validateOwnership(authUser, shopId);
+        validator.validateOwnership(authUser.id(), shopId);
 
         // Mapper를 사용하여 ResponseDto 리스트로 변환
         return menuRepository.findByShopIdAndIsDeletedFalse(shopId).stream()
@@ -57,40 +56,26 @@ public class MenuService {
 
     @Transactional
     public MenuResponseDto updateMenu(AuthUser authUser, Long menuId,
-        MenuRequestDto menuRequestDto) {
-        validateOwnership(authUser, menuRequestDto.getShopId());
+        MenuRequestDto menuRequestDto, Long shopId) {
+        validator.validateOwnership(authUser.id(), shopId);
 
         // 메뉴 존재 여부 확인
-        Menu menu = menuRepository.findById(menuId)
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+        Menu menu = validator.findMenuByIdOrThrow(menuId);
 
         menu.update(menuRequestDto.getName(), menuRequestDto.getDescription(),
             menuRequestDto.getPrice());
-        Menu savedMenu = menuRepository.save(menu);
 
         // Mapper를 사용하여 ResponseDto로 변환
-        return menuMapper.toResponseDto(savedMenu);
+        return menuMapper.toResponseDto(menu);
     }
 
     @Transactional
     public void softDeleteMenu(AuthUser authUser, Long shopId, Long menuId) {
-        validateOwnership(authUser, shopId);
+        validator.validateOwnership(authUser.id(), shopId);
 
         // 메뉴 존재 여부 확인
-        Menu menu = menuRepository.findById(menuId)
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
+        Menu menu = validator.findMenuByIdOrThrow(menuId);
 
         menu.markAsDeleted();
-        menuRepository.save(menu);
-    }
-
-    private void validateOwnership(AuthUser authUser, Long shopId) {
-        // 가게 존재 여부 및 소유 확인
-        Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
-
-        if (!shop.getUser().getId().equals(authUser.id())) {
-            throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
-        }
     }
 }

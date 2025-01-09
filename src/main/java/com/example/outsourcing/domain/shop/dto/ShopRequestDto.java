@@ -1,7 +1,6 @@
 package com.example.outsourcing.domain.shop.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import lombok.Getter;
 
@@ -11,7 +10,7 @@ public class ShopRequestDto {
     @NotBlank
     private String name;
 
-    @NotNull
+    @NotBlank
     private BigDecimal minOrderPrice;
 
     public ShopRequestDto(String name, BigDecimal minOrderPrice) {

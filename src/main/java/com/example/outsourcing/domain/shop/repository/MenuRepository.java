@@ -14,4 +14,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     // shopId와 메뉴 이름으로 중복 체크 (삭제되지 않은 메뉴만 대상)
     boolean existsByShopIdAndNameAndIsDeletedFalse(Long shopId, String name);
 
+    List<Menu> findByIdIn(List<Long> ids);
+
 }
