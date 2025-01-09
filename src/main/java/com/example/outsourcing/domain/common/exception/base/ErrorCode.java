@@ -39,7 +39,7 @@ public enum ErrorCode {
     SHOP_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 가게를 찾을 수 없습니다."),
     ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "해당 주문에 대한 리뷰가 이미 존재합니다."),
     NOT_COMPLETED_ORDER(HttpStatus.BAD_REQUEST, "완료 처리된 주문이 아닙니다."),
-    REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "완료 처리된 주문이 아닙니다."),
+    REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 리뷰를 찾을 수 없습니다."),
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),

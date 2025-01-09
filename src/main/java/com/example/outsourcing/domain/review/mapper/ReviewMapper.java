@@ -17,6 +17,7 @@ public class ReviewMapper {
 
     public static UserReviewResponseDto toUserReviewDto(Review review) {
         return new UserReviewResponseDto(
+            review.getShop().getId(),
             review.getShop().getName(),
             review.getContent(),
             review.getCreatedAt(),
