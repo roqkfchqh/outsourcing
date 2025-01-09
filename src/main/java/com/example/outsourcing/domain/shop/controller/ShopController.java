@@ -63,7 +63,7 @@ public class ShopController {
     }
 
     //가게 삭제 요청 처리 (소프트 딜리트)
-    @DeleteMapping
+    @DeleteMapping("/{shopId}")
     public void deleteShop(
         @PathVariable Long shopId, //삭제 대상 가게 ID
         @Auth AuthUser authUser) { //인증된 사용자 정보
