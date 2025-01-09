@@ -1,14 +1,13 @@
 package com.example.outsourcing.domain.common.notification;
 
 import com.example.outsourcing.domain.common.dto.AuthUser;
+import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.entity.Order;
-import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.review.dto.UserReviewResponseDto;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -19,9 +18,19 @@ import org.springframework.stereotype.Component;
 public class NotificationAspect {
 
     private final WebSocketService webSocketService;
-    private final OrderRepository orderRepository;
     private final ShopRepository shopRepository;
 
+    @AfterReturning(
+        pointcut = "execution(* com.example.outsourcing.domain.order.service.OrderService.createOrder(..)) && args(user)",
+        returning = "order",
+        argNames = "user,order")
+    public void afterCreateOrder(AuthUser user, OrderResponseDto order) {
+        String message =
+            "주문~!\n" + "메뉴: " + order.orderMenu() + "\n총계: " + order.totalPrice().toString();
+        webSocketService.sendNotificationToUser(order.ownerId(), message);
+    }
+
+    //주문 다음단계 알림(서버 -> 주문한손님)
     @AfterReturning(
         pointcut = "execution(* com.example.outsourcing.domain.order.service.OrderService.toNextStatus(..)) && args(user, orderId)",
         returning = "order",
@@ -31,13 +40,17 @@ public class NotificationAspect {
         webSocketService.sendNotificationToUser(order.getUser().getId(), message);
     }
 
-    @After(value = "execution(* com.example.outsourcing.domain.order.service.OrderService.rejectOrder(..)) && args(user, orderId)", argNames = "user,orderId")
-    public void afterOrderRejected(AuthUser user, Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow();
-        String message = "주문이 거절되었습니다. \n일시: " + order.getUpdatedAt().format(formatter);
-        webSocketService.sendNotificationToUser(order.getUser().getId(), message);
+    //주문 거절 알림(서버 -> 주문한손님)
+    @AfterReturning(
+        pointcut = "execution(* com.example.outsourcing.domain.order.service.OrderService.rejectOrder(..)) && args(user, orderId)",
+        returning = "userId",
+        argNames = "user,orderId,userId")
+    public void afterOrderRejected(AuthUser user, Long orderId, Long userId) {
+        String message = "주문이 거절되었습니다.";
+        webSocketService.sendNotificationToUser(userId, message);
     }
 
+    //리뷰 작성 알림(서버 -> 상점 주인)
     @AfterReturning(
         pointcut = "execution(* com.example.outsourcing.domain.review.service.ReviewService.createReview(..))",
         returning = "review"
