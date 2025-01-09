@@ -18,7 +18,9 @@ public class OrderMapper {
             order.getUser().getUsername(),
             order.getStatus(),
             orderMenuResponseDto,
-            order.getTotalPrice()
+            order.getTotalPrice(),
+            order.getCreatedAt(),
+            order.getUpdatedAt()
         );
     }
 }

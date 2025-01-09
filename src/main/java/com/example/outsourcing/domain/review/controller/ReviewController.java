@@ -45,25 +45,22 @@ public class ReviewController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ShopReviewResponseDto>> getShopReviews(
-        @RequestParam Long shopId,
-        @RequestParam(defaultValue = PAGE_COUNT) int page,
-        @RequestParam(defaultValue = PAGE_SIZE) int size
-    ) {
-        Pageable pageable = validatePageSize(page, size);
-        Page<ShopReviewResponseDto> reviews = reviewService.getShopReviews(shopId, pageable);
-        return ResponseEntity.ok(reviews);
-    }
-
-    @GetMapping
-    public ResponseEntity<Page<UserReviewResponseDto>> getUserReviews(
+    public ResponseEntity<Page<?>> getReviews(
+        @RequestParam(required = false) Long shopId,
         @Auth AuthUser authUser,
         @RequestParam(defaultValue = PAGE_COUNT) int page,
         @RequestParam(defaultValue = PAGE_SIZE) int size
     ) {
         Pageable pageable = validatePageSize(page, size);
-        Page<UserReviewResponseDto> reviews = reviewService.getUserReviews(authUser, pageable);
-        return ResponseEntity.ok(reviews);
+        if (shopId != null) {
+            Page<ShopReviewResponseDto> reviews = reviewService.getShopReviews(shopId, pageable);
+            return ResponseEntity.ok(reviews);
+        }
+        if (authUser.id() != null) {
+            Page<UserReviewResponseDto> reviews = reviewService.getUserReviews(authUser, pageable);
+            return ResponseEntity.ok(reviews);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{reviewId}")

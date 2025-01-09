@@ -46,7 +46,7 @@ public class ReviewService {
         }
         // 해당 주문에 대한 리뷰가 이미 존재하는지 확인
         if (reviewRepository.existsByOrderId(orderId)) {
-            throw new InvalidRequestException(ErrorCode.AlREADY_REVIEWED);
+            throw new InvalidRequestException(ErrorCode.ALREADY_REVIEWED);
         }
 
         Shop shop = order.getOrderMenus().stream()
