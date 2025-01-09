@@ -1,6 +1,8 @@
 package com.example.outsourcing.domain.user.controller;
 
-import com.example.outsourcing.domain.user.dto.UserRequestDto;
+import com.example.outsourcing.domain.user.dto.LoginRequestDto;
+import com.example.outsourcing.domain.user.dto.SignUpRequestDto;
+import com.example.outsourcing.domain.user.dto.UserResponseDto;
 import com.example.outsourcing.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +21,15 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> userResgister(@Valid @RequestBody UserRequestDto requestDto) {
+    public ResponseEntity<String> register(@Valid @RequestBody SignUpRequestDto requestDto) {
         userService.register(requestDto);
         return ResponseEntity.ok("회원가입에 성공했습니다.");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserRequestDto requestDto) {
-        userService.login(requestDto);
-        return ResponseEntity.ok("로그인에 성공했습니다.");
+    public UserResponseDto login(@Valid @RequestBody LoginRequestDto requestDto) {
+        String token = userService.login(requestDto);
+        return new UserResponseDto(token, "로그인에 성공했습니다.");
     }
 
     @PostMapping("/logout")

@@ -8,4 +8,5 @@ import lombok.Getter;
 public class UserResponseDto {
 
     private final String bearerToken;
+    private final String message;
 }

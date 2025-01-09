@@ -30,9 +30,7 @@ public class GlobalExceptionHandler {
     // 파라미터 존재하지 않을 때 발생
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Map<String, Object>> handleMissingServletRequestParameterException(
-        HttpServletRequest request,
-        MissingServletRequestParameterException e
-    ) {
+        HttpServletRequest request, MissingServletRequestParameterException e) {
         String errorMessage = e.getParameterName() + " 값이 누락되었습니다.";
         log.warn("잘못된 요청이 들어왔습니다. URI:{}, 내용:{}", request.getRequestURI(), errorMessage);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);
@@ -41,9 +39,7 @@ public class GlobalExceptionHandler {
     // 파라미터 타입과 일치하지 않을 때 발생
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatch(
-        HttpServletRequest request,
-        MethodArgumentTypeMismatchException e
-    ) {
+        HttpServletRequest request, MethodArgumentTypeMismatchException e) {
         String errorMessage = String.format("파라미터 타입 불일치: %s (기대된 타입: %s, 실제 값: %s)", e.getName(),
             Objects.requireNonNull(e.getRequiredType()).getSimpleName(), e.getValue());
         log.warn("잘못된 요청이 들어왔습니다. URI:{}, 내용:{}", request.getRequestURI(), errorMessage);
@@ -53,9 +49,7 @@ public class GlobalExceptionHandler {
     // HTTP 요청의 본문을 읽을 수 없을 때 발생
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(
-        HttpServletRequest request,
-        HttpMessageNotReadableException e
-    ) {
+        HttpServletRequest request, HttpMessageNotReadableException e) {
         log.warn("잘못된 요청이 들어왔습니다. URI:{}, 내용:{}", request.getRequestURI(), e.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
@@ -63,9 +57,7 @@ public class GlobalExceptionHandler {
     // @Valid 에러
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(
-        HttpServletRequest request,
-        MethodArgumentNotValidException e
-    ) {
+        HttpServletRequest request, MethodArgumentNotValidException e) {
         // 글로벌 에러 메시지들
         String globalErrorMessage = e.getGlobalErrors().stream()
             .map(DefaultMessageSourceResolvable::getDefaultMessage)

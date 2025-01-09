@@ -26,12 +26,9 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(
-        @Nullable MethodParameter parameter,
-        @Nullable ModelAndViewContainer mavContainer,
-        NativeWebRequest webRequest,
-        @Nullable WebDataBinderFactory binderFactory
-    ) {
+    public Object resolveArgument(@Nullable MethodParameter parameter,
+        @Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
+        @Nullable WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
 
         Long userId = (Long) request.getAttribute("userId");

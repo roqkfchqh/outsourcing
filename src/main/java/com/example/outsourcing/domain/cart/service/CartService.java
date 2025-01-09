@@ -24,46 +24,46 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CartService {
 
-	private static final String CACHE_NAME = "carts";
-	private final CacheManager cacheManager;
-	private final MenuRepository menuRepository;
-	private final UserRepository userRepository;
-	private final ShopRepository shopRepository;
+    private static final String CACHE_NAME = "carts";
+    private final CacheManager cacheManager;
+    private final MenuRepository menuRepository;
+    private final UserRepository userRepository;
+    private final ShopRepository shopRepository;
 
-	@Cacheable(value = CACHE_NAME, key = "#authUser.id")
-	public Cart getCart(AuthUser authUser) {
-		return new Cart();
-	}
+    @Cacheable(value = CACHE_NAME, key = "#authUser.id")
+    public Cart getCart(AuthUser authUser) {
+        return new Cart();
+    }
 
-	@CachePut(value = CACHE_NAME, key = "#authUser.id")
-	public Cart addItemToCart(AuthUser authUser, Long menuId) {
-		Cart cart = getOrCreateCart(authUser.id());
-		Menu menu = menuRepository.findById(menuId)
-			.orElseThrow(() -> new InvalidRequestException(MENU_NOT_FOUND));
-		cart.addItem(menuId, menu.getShop().getId());
+    @CachePut(value = CACHE_NAME, key = "#authUser.id")
+    public Cart addItemToCart(AuthUser authUser, Long menuId) {
+        Cart cart = getOrCreateCart(authUser.id());
+        Menu menu = menuRepository.findById(menuId)
+            .orElseThrow(() -> new InvalidRequestException(MENU_NOT_FOUND));
+        cart.addItem(menuId, menu.getShop().getId());
 
-		return cart;
-	}
+        return cart;
+    }
 
-	@CachePut(value = CACHE_NAME, key = "#authUser.id")
-	public Cart removeItemFromCart(AuthUser authUser, Long menuId) {
-		Cart cart = getOrCreateCart(authUser.id());
-		cart.removeItem(menuId);
+    @CachePut(value = CACHE_NAME, key = "#authUser.id")
+    public Cart removeItemFromCart(AuthUser authUser, Long menuId) {
+        Cart cart = getOrCreateCart(authUser.id());
+        cart.removeItem(menuId);
 
-		return cart;
-	}
+        return cart;
+    }
 
-	// 캐시에서 삭제
-	@CacheEvict(value = CACHE_NAME, key = "#authUser.id")
-	public void clearCart(AuthUser authUser) {
-	}
+    // 캐시에서 삭제
+    @CacheEvict(value = CACHE_NAME, key = "#authUser.id")
+    public void clearCart(AuthUser authUser) {
+    }
 
-	private Cart getOrCreateCart(Long userId) {
-		Cache cache = cacheManager.getCache(CACHE_NAME);
-		if (cache == null) {
-			throw new ServerException(CACHE_CONFIGURATION_ERROR);
-		}
+    private Cart getOrCreateCart(Long userId) {
+        Cache cache = cacheManager.getCache(CACHE_NAME);
+        if (cache == null) {
+            throw new ServerException(CACHE_CONFIGURATION_ERROR);
+        }
 
-		return Optional.ofNullable(cache.get(userId, Cart.class)).orElseGet(Cart::new);
-	}
+        return Optional.ofNullable(cache.get(userId, Cart.class)).orElseGet(Cart::new);
+    }
 }
