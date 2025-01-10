@@ -2,7 +2,9 @@ package com.example.outsourcing.domain.shop.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import lombok.Getter;
 
+@Getter
 public class ShopResponseDto {
 
     private Long id;
