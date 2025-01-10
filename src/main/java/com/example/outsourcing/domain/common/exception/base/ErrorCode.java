@@ -38,6 +38,7 @@ public enum ErrorCode {
     USER_MAX_SHOPS_REACHED(HttpStatus.BAD_REQUEST, "최대 허용된 가게 수를 초과했습니다."),
     MENU_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 메뉴입니다."),
     ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 완료된 주문입니다."),
+    CANNOT_REVIEW(HttpStatus.BAD_REQUEST, "리뷰 작성 기한(7일)이 지났습니다."),
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),

@@ -1,6 +1,7 @@
 package com.example.outsourcing.domain.order.repository;
 
 import com.example.outsourcing.domain.order.entity.Order;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,5 +34,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "JOIN s.user u " +
         "WHERE o.id = :orderId AND u.id = :ownerId")
     boolean existsOrderByOwner(@Param("orderId") Long orderId, @Param("ownerId") Long ownerId);
+
+
+    /*
+    스케줄링용
+     */
+    List<Order> findAllByStatusAndCreatedAtBefore(Order.Status status, LocalDateTime timestamp);
 
 }
