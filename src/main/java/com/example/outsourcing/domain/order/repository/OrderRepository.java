@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Query("SELECT o FROM Order o " +
+    @Query("SELECT DISTINCT o FROM Order o " +
         "JOIN FETCH o.orderMenus om " +
         "JOIN FETCH om.menu m " +
         "JOIN FETCH m.shop s " +
@@ -17,6 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         "WHERE o.id = :orderId AND u.id = :ownerId")
     Optional<Order> findOrderByOwner(@Param("orderId") Long orderId,
         @Param("ownerId") Long ownerId);
+
 
     @Query("SELECT DISTINCT o FROM Order o " +
         "JOIN FETCH o.orderMenus om " +

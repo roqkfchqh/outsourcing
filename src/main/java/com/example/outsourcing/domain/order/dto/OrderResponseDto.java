@@ -2,13 +2,16 @@ package com.example.outsourcing.domain.order.dto;
 
 import com.example.outsourcing.domain.order.entity.Order.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record OrderResponseDto(
+    Long ownerId,
     String shopName,
-    String username,
+    Long userId,
     Status status,
     List<OrderMenuResponseDto> orderMenu,
     BigDecimal totalPrice,
