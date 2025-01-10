@@ -1,6 +1,9 @@
 package com.example.outsourcing.domain.search.service;
 
 
+import static com.example.outsourcing.domain.common.exception.base.ErrorCode.SEARCH_KEYWORD_SHORT;
+
+import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.search.dto.SearchResponseDto;
 import com.example.outsourcing.domain.search.mapper.SearchMapper;
 import com.example.outsourcing.domain.shop.entity.Menu;
@@ -20,6 +23,9 @@ public class SearchService {
 
 
     public SearchResponseDto searchAll(String keyword) {
+        if (keyword.length() < 2) {
+            throw new InvalidRequestException(SEARCH_KEYWORD_SHORT);
+        }
         List<Shop> shopList = shopRepository.searchByKeyword(keyword);
         List<Menu> menuList = menuRepository.searchByKeyword(keyword);
 

@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
+    //search
+    SEARCH_KEYWORD_SHORT(HttpStatus.BAD_REQUEST, "검색어가 너무 짧습니다. 2글자 이상 검색해주세요."),
+
     //user
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다. 로그인이 필요합니다."),
     WRONG_EMAIL_OR_PASSWORD(HttpStatus.UNAUTHORIZED, "이메일이나 비밀번호를 잘못 입력하였습니다."),
