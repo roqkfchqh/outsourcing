@@ -18,11 +18,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.PatternMatchUtils;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter implements Filter {
 
+    private static final String[] WHITE_LIST = {"/", "/auth/register", "/auth/login", "/auth/logout"};
     private final JwtUtil jwtUtil;
 
     @Override
@@ -31,7 +33,7 @@ public class JwtFilter implements Filter {
     }
 
     /*
-    JwtFilter의 역할
+    JwtFilter의 역할 -> 공부용으로 적어둔 것이오니 최종 전에 지워야 합니다.
     - 유저가 로그인 되어있는지 확인 (인증)
       */
     @Override
@@ -43,9 +45,8 @@ public class JwtFilter implements Filter {
         // 요청URL 중, 포트번호와 쿼리 사이의 부분을 가져와서 문자열형 url로 저장 (컨텍스트 경로 + 서블릿 경로)
         String url = httpRequest.getRequestURI();
 
-        // startsWith는 특정 문자열로 시작되는지 체크하는 것이므로 user변수가 /user로 시작하는 문자열이라면 chain.doFilter(request,
-        // response)를 사용하여 현재 처리 필터를 마치고 요청을 다음필터로 넘긴다. 이후 return하여 종료
-        if (url.startsWith("/auth")) {
+
+        if (isWhiteList(url)) {
             chain.doFilter(request, response);
             return;
         }
@@ -67,7 +68,7 @@ public class JwtFilter implements Filter {
             return;
         }
 
-        if (UserService.expiredTokenSet.contains(bearerJwt)) {
+        if (JwtUtil.expiredTokenSet.contains(bearerJwt)) {
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "토큰이 유효하지 않습니다.");
             return;
         }
@@ -130,4 +131,7 @@ public class JwtFilter implements Filter {
         chain.doFilter(httpRequest, httpResponse);
     }
 
+    private boolean isWhiteList(String requsetURI) {
+        return PatternMatchUtils.simpleMatch(WHITE_LIST, requsetURI);
+    }
 }

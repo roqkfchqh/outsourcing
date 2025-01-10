@@ -1,5 +1,6 @@
-package com.example.outsourcing.domain.common.notification;
+package com.example.outsourcing.config;
 
+import com.example.outsourcing.domain.common.notification.WebSocketService;
 import com.example.outsourcing.domain.common.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import java.util.Objects;

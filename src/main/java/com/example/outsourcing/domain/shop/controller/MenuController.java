@@ -1,6 +1,8 @@
 package com.example.outsourcing.domain.shop.controller;
 
 import com.example.outsourcing.domain.common.annotation.Auth;
+import com.example.outsourcing.domain.common.authorization.OwnerCheck;
+import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.shop.dto.MenuRequestDto;
 import com.example.outsourcing.domain.shop.dto.MenuResponseDto;
@@ -27,6 +29,7 @@ public class MenuController {
     private final MenuService menuService;
 
     //메뉴 추가 요청 처리
+    @OwnerCheck
     @PostMapping("/menus")
     public ResponseEntity<MenuResponseDto> addMenu(
         @RequestBody @Valid MenuRequestDto menuRequestDto, //요청 본문의 메뉴 데이터
@@ -46,6 +49,7 @@ public class MenuController {
     }
 
     //특정 메뉴 정보 수정 요청 처리
+    @OwnerCheck
     @PatchMapping("/menus/{menuId}")
     public ResponseEntity<MenuResponseDto> updateMenu(
         @PathVariable Long menuId, //수정 대상 메뉴 ID
@@ -58,6 +62,7 @@ public class MenuController {
     }
 
     //특정 메뉴 삭제 요청 처리 (소프트 딜리트)
+    @OwnerCheck
     @DeleteMapping("/menus/{menuId}")
     public ResponseEntity<Void> deleteMenu(
         @RequestParam Long shopId, //삭제 대상 메뉴가 속한 가게 ID

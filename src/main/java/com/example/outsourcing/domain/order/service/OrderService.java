@@ -51,7 +51,8 @@ public class OrderService {
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
             .map(OrderMenuMapper::toDto)
             .toList();
-        return OrderMapper.toDto(shop.getUser().getId(), shop.getName(), order, orderMenusDto);
+        return OrderMapper.toDto(shop.getId(), shop.getUser().getId(), shop.getName(), order,
+            orderMenusDto);
     }
 
     @Transactional
@@ -59,6 +60,11 @@ public class OrderService {
         // 해당 주문을 받은 가게의 사장님인지 확인
         Order order = orderRepository.findOrderByOwner(orderId, user.id())
             .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
+
+        //이미 완료된 주문
+        if (order.getStatus().equals(Status.COMPLETED)) {
+            throw new InvalidRequestException(ErrorCode.ALREADY_COMPLETED);
+        }
 
         // 다음 상태로 변경
         order.nextStatus();
@@ -97,7 +103,7 @@ public class OrderService {
             .map(OrderMenuMapper::toDto)
             .toList();
 
-        return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
+        return OrderMapper.toDto(shop.getId(), shop.getName(), order, orderMenusDto);
     }
 
     public List<OrderResponseDto> getOrdersByShop(AuthUser authUser, Long shopId) {
@@ -122,7 +128,7 @@ public class OrderService {
                 List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
                     .map(OrderMenuMapper::toDto)
                     .toList();
-                return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
+                return OrderMapper.toDto(shop.getId(), shop.getName(), order, orderMenusDto);
             })
             .toList();
     }

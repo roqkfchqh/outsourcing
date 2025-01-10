@@ -1,7 +1,7 @@
 package com.example.outsourcing.domain.order.mapper;
 
-import com.example.outsourcing.domain.cart.entity.OrderMenu;
 import com.example.outsourcing.domain.order.dto.OrderMenuResponseDto;
+import com.example.outsourcing.domain.order.entity.OrderMenu;
 
 public class OrderMenuMapper {
 

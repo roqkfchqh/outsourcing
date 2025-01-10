@@ -53,6 +53,9 @@ public class ReviewService {
             .findFirst()
             .map(orderMenu -> orderMenu.getMenu().getShop())
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
+        if (shop.isDeleted()) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
 
         Review review = Review.of(User.fromAuthUser(user), shop, order, dto.content(),
             dto.rating());

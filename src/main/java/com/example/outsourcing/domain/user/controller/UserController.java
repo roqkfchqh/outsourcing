@@ -4,6 +4,7 @@ import com.example.outsourcing.domain.user.dto.LoginRequestDto;
 import com.example.outsourcing.domain.user.dto.SignUpRequestDto;
 import com.example.outsourcing.domain.user.dto.UserResponseDto;
 import com.example.outsourcing.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public UserResponseDto login(@Valid @RequestBody LoginRequestDto requestDto) {
+    public ResponseEntity<UserResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto) {
         String token = userService.login(requestDto);
-        return new UserResponseDto(token, "로그인에 성공했습니다.");
+        return ResponseEntity.ok(new UserResponseDto(token, "로그인에 성공했습니다."));
     }
 
     @PostMapping("/logout")

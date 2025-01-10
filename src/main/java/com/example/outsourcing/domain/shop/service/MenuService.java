@@ -9,6 +9,7 @@ import com.example.outsourcing.domain.shop.dto.MenuResponseDto;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
+import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +24,17 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final MenuMapper menuMapper;
     private final ShopMenuValidator validator;
+    private final ShopRepository shopRepository;
 
     @Transactional
     public MenuResponseDto addMenu(AuthUser authUser,
         MenuRequestDto menuRequestDto, Long shopId) {
         validator.validateOwnership(authUser.id(), shopId);
+
+        //이미 삭제된 가게
+        if (shopRepository.existsByIdAndIsDeletedTrue(shopId)) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
 
         // 중복된 메뉴 이름 확인
         if (menuRepository.existsByShopIdAndNameAndIsDeletedFalse(shopId,
@@ -58,8 +65,18 @@ public class MenuService {
         MenuRequestDto menuRequestDto, Long shopId) {
         validator.validateOwnership(authUser.id(), shopId);
 
+        //이미 삭제된 가게
+        if (shopRepository.existsByIdAndIsDeletedTrue(shopId)) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
+
         // 메뉴 존재 여부 확인
         Menu menu = validator.findMenuByIdOrThrow(menuId);
+
+        //이미 삭제된 메뉴
+        if (menu.isDeleted()) {
+            throw new InvalidRequestException(ErrorCode.MENU_ALREADY_DELETED);
+        }
 
         menu.update(menuRequestDto.getName(), menuRequestDto.getDescription(),
             menuRequestDto.getPrice());

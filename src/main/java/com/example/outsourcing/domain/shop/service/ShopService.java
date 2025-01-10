@@ -30,6 +30,10 @@ public class ShopService {
     public ShopResponseDto addShop(AuthUser authUser,
         ShopRequestDto shopRequestDto) {
 
+        if (shopRepository.existsByName(shopRequestDto.getName())) {
+            throw new InvalidRequestException(ErrorCode.SHOP_ALREADY_EXISTS);
+        }
+
         long shopCount = shopRepository.countByUserIdAndIsDeletedFalse(authUser.id());
         if (shopCount >= MAX_SHOPS_PER_USER) {
             throw new InvalidRequestException(ErrorCode.USER_MAX_SHOPS_REACHED); // 예외 처리
@@ -55,8 +59,16 @@ public class ShopService {
     public ShopResponseDto updateShop(AuthUser authUser, Long shopId,
         ShopUpdateRequestDto shopUpdateRequestDto) {
         validator.validateOwnership(authUser.id(), shopId);
+        //이미 삭제된 가게
+        if (shopRepository.existsByIdAndIsDeletedTrue(shopId)) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
 
         Shop shop = validator.findShopByIdOrThrow(shopId);
+
+        if (shopRepository.existsByName(shopUpdateRequestDto.getName())) {
+            throw new InvalidRequestException(ErrorCode.SHOP_ALREADY_EXISTS);
+        }
 
         // 가게 이름 업데이트
         if (shopUpdateRequestDto.getName() != null) {
@@ -82,6 +94,10 @@ public class ShopService {
     public void deleteShop(AuthUser authUser, Long shopId) {
         validator.validateOwnership(authUser.id(), shopId); // 헬퍼 클래스 활용
         Shop shop = validator.findShopByIdOrThrow(shopId);
+
+        if (shop.isDeleted()) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
 
         shop.markAsDeleted();
     }

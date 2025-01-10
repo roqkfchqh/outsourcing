@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.example.outsourcing.domain.cart.entity.OrderMenu;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.exception.ForbiddenException;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.entity.Order;
+import com.example.outsourcing.domain.order.entity.OrderMenu;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.order.service.OrderService;
 import com.example.outsourcing.domain.shop.entity.Menu;
