@@ -2,6 +2,7 @@ package com.example.outsourcing.domain.cart.service;
 
 import static com.example.outsourcing.domain.common.exception.base.ErrorCode.CACHE_CONFIGURATION_ERROR;
 import static com.example.outsourcing.domain.common.exception.base.ErrorCode.MENU_NOT_FOUND;
+import static com.example.outsourcing.domain.common.exception.base.ErrorCode.SHOP_DELETED;
 
 import com.example.outsourcing.domain.cart.entity.Cart;
 import com.example.outsourcing.domain.common.dto.AuthUser;
@@ -9,8 +10,6 @@ import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.ServerException;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
-import com.example.outsourcing.domain.shop.repository.ShopRepository;
-import com.example.outsourcing.domain.user.repository.UserRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
@@ -27,8 +26,6 @@ public class CartService {
     private static final String CACHE_NAME = "carts";
     private final CacheManager cacheManager;
     private final MenuRepository menuRepository;
-    private final UserRepository userRepository;
-    private final ShopRepository shopRepository;
 
     @Cacheable(value = CACHE_NAME, key = "#authUser.id")
     public Cart getCart(AuthUser authUser) {
@@ -40,6 +37,12 @@ public class CartService {
         Cart cart = getOrCreateCart(authUser.id());
         Menu menu = menuRepository.findById(menuId)
             .orElseThrow(() -> new InvalidRequestException(MENU_NOT_FOUND));
+        if (menu.isDeleted()) {
+            throw new InvalidRequestException(MENU_NOT_FOUND);
+        }
+        if (menu.getShop().isDeleted()) {
+            throw new InvalidRequestException(SHOP_DELETED);
+        }
         cart.addItem(menuId, menu.getShop().getId());
 
         return cart;
