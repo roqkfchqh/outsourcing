@@ -18,7 +18,6 @@ public class SearchService {
     private final ShopRepository shopRepository;
     private final MenuRepository menuRepository;
 
-
     public SearchResponseDto searchAll(String keyword) {
         List<Shop> shopList = shopRepository.searchByKeyword(keyword);
         List<Menu> menuList = menuRepository.searchByKeyword(keyword);

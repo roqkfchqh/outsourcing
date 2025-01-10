@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ShopService {
 
+    private static final int MAX_SHOPS_PER_USER = 3;
+
     private final ShopRepository shopRepository;
     private final ShopMapper shopMapper;
     private final ShopMenuValidator validator;
@@ -27,17 +29,24 @@ public class ShopService {
     @Transactional
     public ShopResponseDto addShop(AuthUser authUser,
         ShopRequestDto shopRequestDto) {
-        // 사용자당 최대 가게 수 확인
-        if (shopRepository.existsByUserIdAndIsDeletedFalse(authUser.id())) {
-            throw new InvalidRequestException(ErrorCode.ALREADY_USED_EMAIL);
+
+        long shopCount = shopRepository.countByUserIdAndIsDeletedFalse(authUser.id());
+        if (shopCount >= MAX_SHOPS_PER_USER) {
+            throw new InvalidRequestException(ErrorCode.USER_MAX_SHOPS_REACHED); // 예외 처리
         }
 
         User user = User.fromAuthUser(authUser);
 
-        // Shop 객체 생성 및 저장 후 바로 DTO 변환
+        // ShopService: Shop 생성과 저장
         return shopMapper.toResponseDto(
             shopRepository.save(
-                new Shop(user, shopRequestDto.getName(), shopRequestDto.getMinOrderPrice())
+                Shop.create(
+                    user,
+                    shopRequestDto.getName(),
+                    shopRequestDto.getMinOrderPrice(),
+                    shopRequestDto.getOpen(),
+                    shopRequestDto.getClose()
+                )
             )
         );
     }

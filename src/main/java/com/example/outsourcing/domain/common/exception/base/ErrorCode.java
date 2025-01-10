@@ -32,9 +32,14 @@ public enum ErrorCode {
     MENU_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "같은 이름의 메뉴가 이미 존재합니다."),
     SHOP_HOURS_INVALID(HttpStatus.BAD_REQUEST, "영업 시작 시간이 영업 종료 시간 이후일 수 없습니다."),
     REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 리뷰를 찾을 수 없습니다."),
+    MIN_ORDER_PRICE_MUST_BE_GREATER_THAN_ZERO(HttpStatus.BAD_REQUEST, "최소 주문 금액은 0보다 커야 합니다."),
+    PRICE_MUST_BE_GREATER_THAN_ZERO(HttpStatus.BAD_REQUEST, "가격은 0보다 커야 합니다."),
+    USER_MAX_SHOPS_REACHED(HttpStatus.BAD_REQUEST, "최대 허용된 가게 수를 초과했습니다."),
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    FORBIDDEN_OWNER(HttpStatus.FORBIDDEN, "권한이 없습니다. 사장님 계정만 접근이 가능합니다."),
+    FORBIDDEN_USER(HttpStatus.FORBIDDEN, "권한이 없습니다. 손님 계정만 접근이 가능합니다.."),
 
     //server
     CACHE_CONFIGURATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "캐시 설정 오류입니다. 캐시 구성을 확인하세요.");

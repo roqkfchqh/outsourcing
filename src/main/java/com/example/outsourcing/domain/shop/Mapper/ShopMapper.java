@@ -12,8 +12,9 @@ public class ShopMapper {
             shop.getId(),
             shop.getName(),
             shop.getMinOrderPrice(),
+            shop.getOpen(),
+            shop.getClose(),
             shop.isDeleted()
         );
     }
-
 }

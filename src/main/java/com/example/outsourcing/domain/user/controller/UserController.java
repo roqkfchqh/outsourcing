@@ -4,6 +4,7 @@ import com.example.outsourcing.domain.user.dto.LoginRequestDto;
 import com.example.outsourcing.domain.user.dto.SignUpRequestDto;
 import com.example.outsourcing.domain.user.dto.UserResponseDto;
 import com.example.outsourcing.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
