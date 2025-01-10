@@ -73,6 +73,16 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
+    // 500 서버에러
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleException(
+        HttpServletRequest request,
+        Exception e
+    ) {
+        log.error("예상하지 못한 예외가 발생했습니다. URI:{}, 내용:{}", request.getRequestURI(), e.getMessage(), e);
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버가 응답할 수 없습니다.");
+    }
+
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status,
         String message) {
         Map<String, Object> response = new HashMap<>();
