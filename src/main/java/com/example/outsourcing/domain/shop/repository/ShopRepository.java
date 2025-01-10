@@ -11,4 +11,6 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, ShopRepositor
     long countByUserIdAndIsDeletedFalse(Long userId);
 
     boolean existsByName(@NotBlank String name);
+
+    boolean existsByIdAndIsDeletedTrue(Long shopId);
 }

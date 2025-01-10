@@ -59,6 +59,10 @@ public class ShopService {
     public ShopResponseDto updateShop(AuthUser authUser, Long shopId,
         ShopUpdateRequestDto shopUpdateRequestDto) {
         validator.validateOwnership(authUser.id(), shopId);
+        //이미 삭제된 가게
+        if (shopRepository.existsByIdAndIsDeletedTrue(shopId)) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
 
         Shop shop = validator.findShopByIdOrThrow(shopId);
 
