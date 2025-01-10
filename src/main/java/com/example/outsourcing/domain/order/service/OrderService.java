@@ -61,6 +61,11 @@ public class OrderService {
         Order order = orderRepository.findOrderByOwner(orderId, user.id())
             .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
 
+        //이미 완료된 주문
+        if (order.getStatus().equals(Status.COMPLETED)) {
+            throw new InvalidRequestException(ErrorCode.ALREADY_COMPLETED);
+        }
+
         // 다음 상태로 변경
         order.nextStatus();
         return order;
