@@ -9,13 +9,13 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 
 import com.example.outsourcing.domain.cart.entity.Cart;
-import com.example.outsourcing.domain.cart.entity.OrderMenu;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.order.dto.OrderMenuResponseDto;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.entity.Order;
+import com.example.outsourcing.domain.order.entity.OrderMenu;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.order.service.OrderCartService;
 import com.example.outsourcing.domain.order.service.OrderCartValidation;

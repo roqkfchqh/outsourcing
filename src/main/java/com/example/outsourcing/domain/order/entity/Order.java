@@ -1,6 +1,5 @@
 package com.example.outsourcing.domain.order.entity;
 
-import com.example.outsourcing.domain.cart.entity.OrderMenu;
 import com.example.outsourcing.domain.common.entity.Timestamped;
 import com.example.outsourcing.domain.user.entity.User;
 import jakarta.persistence.CascadeType;

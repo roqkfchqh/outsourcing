@@ -1,6 +1,5 @@
 package com.example.outsourcing.config;
 
-import com.example.outsourcing.domain.common.notification.WebSocketHandler;
 import com.example.outsourcing.domain.common.notification.WebSocketService;
 import com.example.outsourcing.domain.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
