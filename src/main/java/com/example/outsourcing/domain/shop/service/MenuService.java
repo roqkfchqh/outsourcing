@@ -46,7 +46,6 @@ public class MenuService {
     }
 
     public List<MenuResponseDto> getAllMenusByShop(AuthUser authUser, Long shopId) {
-        validator.validateOwnership(authUser.id(), shopId);
 
         // Mapper를 사용하여 ResponseDto 리스트로 변환
         return menuRepository.findByShopIdAndIsDeletedFalse(shopId).stream()
@@ -75,6 +74,11 @@ public class MenuService {
 
         // 메뉴 존재 여부 확인
         Menu menu = validator.findMenuByIdOrThrow(menuId);
+
+        // 이미 삭제된 상태라면 예외 발생
+        if (menu.isDeleted()) {
+            throw new InvalidRequestException(ErrorCode.MENU_ALREADY_DELETED);
+        }
 
         menu.markAsDeleted();
     }
