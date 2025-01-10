@@ -1,7 +1,9 @@
 package com.example.outsourcing.domain.shop.dto;
 
 import java.math.BigDecimal;
+import lombok.Getter;
 
+@Getter
 public class MenuResponseDto {
 
     private Long id;

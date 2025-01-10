@@ -38,10 +38,21 @@ public class Shop extends Timestamped {
     private boolean isDeleted;
 
     // 커스텀 생성자 추가
-    public Shop(User user, String name, BigDecimal minOrderPrice) {
+    private Shop(User user, String name, BigDecimal minOrderPrice, LocalTime open,
+        LocalTime close) {
         this.user = user;
         this.name = name;
         this.minOrderPrice = minOrderPrice;
+        this.setHours(open, close);
+    }
+
+    // 정적 팩토리 메서드
+    public static Shop create(User user, String name, BigDecimal minOrderPrice, LocalTime open,
+        LocalTime close) {
+        if (minOrderPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidRequestException(ErrorCode.PRICE_MUST_BE_GREATER_THAN_ZERO);
+        }
+        return new Shop(user, name, minOrderPrice, open, close);
     }
 
     // 가게 이름 업데이트
