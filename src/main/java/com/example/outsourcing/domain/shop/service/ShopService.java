@@ -34,10 +34,16 @@ public class ShopService {
 
         User user = User.fromAuthUser(authUser);
 
-        // Shop 객체 생성 및 저장 후 바로 DTO 변환
+        // ShopService: Shop 생성과 저장
         return shopMapper.toResponseDto(
             shopRepository.save(
-                new Shop(user, shopRequestDto.getName(), shopRequestDto.getMinOrderPrice())
+                Shop.create(
+                    user,
+                    shopRequestDto.getName(),
+                    shopRequestDto.getMinOrderPrice(),
+                    shopRequestDto.getOpen(),
+                    shopRequestDto.getClose()
+                )
             )
         );
     }

@@ -36,10 +36,10 @@ public class MenuService {
         }
 
         Shop shop = validator.findShopByIdOrThrow(shopId); // 가게 존재 여부
-        // Mapper를 사용하여 ResponseDto로 변환
+        // MenuService: Menu 생성과 저장
         return menuMapper.toResponseDto(
             menuRepository.save(
-                new Menu(shop, menuRequestDto.getName(), menuRequestDto.getDescription(),
+                Menu.create(shop, menuRequestDto.getName(), menuRequestDto.getDescription(),
                     menuRequestDto.getPrice())
             )
         );
