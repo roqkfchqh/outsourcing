@@ -44,6 +44,7 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 리뷰를 찾을 수 없습니다."),
     MIN_ORDER_PRICE_MUST_BE_GREATER_THAN_ZERO(HttpStatus.BAD_REQUEST, "최소 주문 금액은 0보다 커야 합니다."),
     PRICE_MUST_BE_GREATER_THAN_ZERO(HttpStatus.BAD_REQUEST, "가격은 0보다 커야 합니다."),
+    USER_MAX_SHOPS_REACHED(HttpStatus.BAD_REQUEST, "최대 허용된 가게 수를 초과했습니다."),
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),
