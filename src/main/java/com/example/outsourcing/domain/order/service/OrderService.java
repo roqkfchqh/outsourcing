@@ -51,7 +51,8 @@ public class OrderService {
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
             .map(OrderMenuMapper::toDto)
             .toList();
-        return OrderMapper.toDto(shop.getUser().getId(), shop.getName(), order, orderMenusDto);
+        return OrderMapper.toDto(shop.getId(), shop.getUser().getId(), shop.getName(), order,
+            orderMenusDto);
     }
 
     @Transactional
@@ -97,7 +98,7 @@ public class OrderService {
             .map(OrderMenuMapper::toDto)
             .toList();
 
-        return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
+        return OrderMapper.toDto(shop.getId(), shop.getName(), order, orderMenusDto);
     }
 
     public List<OrderResponseDto> getOrdersByShop(AuthUser authUser, Long shopId) {
@@ -122,7 +123,7 @@ public class OrderService {
                 List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
                     .map(OrderMenuMapper::toDto)
                     .toList();
-                return OrderMapper.toDto(shop.getName(), order, orderMenusDto);
+                return OrderMapper.toDto(shop.getId(), shop.getName(), order, orderMenusDto);
             })
             .toList();
     }

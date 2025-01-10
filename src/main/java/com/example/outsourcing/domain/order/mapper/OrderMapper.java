@@ -8,6 +8,7 @@ import java.util.List;
 public class OrderMapper {
 
     public static OrderResponseDto toDto(
+        Long shopId,
         Long ownerId,
         String shopName,
         Order order,
@@ -15,6 +16,8 @@ public class OrderMapper {
     ) {
 
         return new OrderResponseDto(
+            shopId,
+            order.getId(),
             ownerId,
             shopName,
             order.getUser().getId(),
@@ -27,12 +30,15 @@ public class OrderMapper {
     }
 
     public static OrderResponseDto toDto(
+        Long shopId,
         String shopName,
         Order order,
         List<OrderMenuResponseDto> orderMenuResponseDto
     ) {
 
         return new OrderResponseDto(
+            shopId,
+            order.getId(),
             null,
             shopName,
             order.getUser().getId(),
