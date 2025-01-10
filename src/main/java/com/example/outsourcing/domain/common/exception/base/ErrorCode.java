@@ -48,6 +48,8 @@ public enum ErrorCode {
 
     //forbidden
     FORBIDDEN_OPERATION(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    FORBIDDEN_OWNER(HttpStatus.FORBIDDEN, "권한이 없습니다. 사장님 계정만 접근이 가능합니다."),
+    FORBIDDEN_USER(HttpStatus.FORBIDDEN, "권한이 없습니다. 손님 계정만 접근이 가능합니다.."),
 
     //server
     CACHING_WRAPPER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,

@@ -3,6 +3,7 @@ package com.example.outsourcing.domain.cart.controller;
 import com.example.outsourcing.domain.cart.entity.Cart;
 import com.example.outsourcing.domain.cart.service.CartService;
 import com.example.outsourcing.domain.common.annotation.Auth;
+import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ public class CartController {
 
     private final CartService cartService;
 
+    @UserCheck
     @GetMapping("/items")
     public ResponseEntity<Cart> getCart(@Auth AuthUser authUser) {
         Cart cart = cartService.getCart(authUser);
@@ -27,6 +29,7 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
+    @UserCheck
     @PostMapping("/items/{menuId}")
     public ResponseEntity<Cart> addItemToCart(@Auth AuthUser authUser, @PathVariable Long menuId) {
         Cart cart = cartService.addItemToCart(authUser, menuId);
@@ -34,6 +37,7 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
+    @UserCheck
     @DeleteMapping("/items/{menuId}")
     public ResponseEntity<Cart> removeItemFromCart(@Auth AuthUser authUser,
         @PathVariable Long menuId) {
@@ -42,6 +46,7 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
+    @UserCheck
     @DeleteMapping("/items")
     public ResponseEntity<Void> clearCart(@Auth AuthUser authUser) {
         cartService.clearCart(authUser);

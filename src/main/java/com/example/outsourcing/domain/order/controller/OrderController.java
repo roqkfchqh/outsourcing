@@ -1,6 +1,8 @@
 package com.example.outsourcing.domain.order.controller;
 
 import com.example.outsourcing.domain.common.annotation.Auth;
+import com.example.outsourcing.domain.common.authorization.OwnerCheck;
+import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.service.OrderService;
@@ -27,6 +29,7 @@ public class OrderController {
     /**
      * 주문 요청 (수락/거절 가능한 상태로 변경, 장바구니 캐시 삭제)
      */
+    @UserCheck
     @PostMapping
     public ResponseEntity<OrderResponseDto> createOrder(
         @Auth AuthUser authUser
@@ -38,6 +41,7 @@ public class OrderController {
     /**
      * 주문 상태 "다음 상태"로 변경 (보류 -> 수락 -> 배달 중 -> 배달 완료)
      */
+    @OwnerCheck
     @PatchMapping("/{orderId}")
     public ResponseEntity<Void> toNextStatus(
         @Auth AuthUser authUser,
@@ -50,6 +54,7 @@ public class OrderController {
     /**
      * 주문 상태 조회
      */
+    @UserCheck
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponseDto> getOrder(
         @Auth AuthUser authUser,
@@ -62,6 +67,7 @@ public class OrderController {
     /**
      * 주문 거절
      */
+    @OwnerCheck
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> rejectOrder(
         @Auth AuthUser authUser,
@@ -74,6 +80,7 @@ public class OrderController {
     /**
      * 사장님이 가게의 모든 주문 요청 조회
      */
+    @OwnerCheck
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> getOrdersByShop(
         @Auth AuthUser authUser,

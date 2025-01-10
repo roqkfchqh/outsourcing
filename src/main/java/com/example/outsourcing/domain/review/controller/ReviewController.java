@@ -1,6 +1,7 @@
 package com.example.outsourcing.domain.review.controller;
 
 import com.example.outsourcing.domain.common.annotation.Auth;
+import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
@@ -34,6 +35,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @UserCheck
     @PostMapping
     public ResponseEntity<UserReviewResponseDto> createReview(
         @Auth AuthUser authUser,
@@ -63,6 +65,7 @@ public class ReviewController {
         return ResponseEntity.notFound().build();
     }
 
+    @UserCheck
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> deleteReview(
         @Auth AuthUser authUser,

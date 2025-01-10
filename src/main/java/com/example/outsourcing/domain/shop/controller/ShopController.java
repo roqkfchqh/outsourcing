@@ -1,6 +1,7 @@
 package com.example.outsourcing.domain.shop.controller;
 
 import com.example.outsourcing.domain.common.annotation.Auth;
+import com.example.outsourcing.domain.common.authorization.OwnerCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.shop.dto.ShopRequestDto;
 import com.example.outsourcing.domain.shop.dto.ShopResponseDto;
@@ -25,6 +26,7 @@ public class ShopController {
     private final ShopService shopService;
 
     // 가게 추가 요청 처리
+    @OwnerCheck
     @PostMapping
     public ResponseEntity<ShopResponseDto> addShop(
         @RequestBody @Valid ShopRequestDto shopRequestDto, // 요청 본문의 가게 데이터
@@ -34,6 +36,7 @@ public class ShopController {
     }
 
     //가게 정보 및 영업 시간 수정 요청 처리
+    @OwnerCheck
     @PatchMapping("/{shopId}")
     public ResponseEntity<ShopResponseDto> updateShop(
         @PathVariable Long shopId, //수정 대상 가게 ID
@@ -46,6 +49,7 @@ public class ShopController {
     }
 
     //가게 삭제 요청 처리 (소프트 딜리트)
+    @OwnerCheck
     @DeleteMapping("/{shopId}")
     public ResponseEntity<Void> deleteShop(
         @PathVariable Long shopId, //삭제 대상 가게 ID
