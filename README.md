@@ -74,7 +74,9 @@
 
 | 포스트                       | 태그            |
 | ----------------------------- | ------------- |
+| [Spring Scheduler로 DB 주기적으로 업데이트 하기](https://teamsparta.notion.site/Spring-Scheduler-DB-e9aeb4d3875946e696c2882373511ba6) | `Spring Scheduler` `Cron` |
 | [FULLTEXT 검색으로 성능 개선](https://teamsparta.notion.site/FULLTEXT-8d9c64e8ddab4c9f920ec22108f5801a) | `FULLTEXT INDEX` `MySQL`|
+| [HQL Parsing 에러](https://teamsparta.notion.site/HQL-Parsing-0e8ef1ebe82e4b568f144cd18db41b8a) | `QueryDSL` `Dialect` |
 | [WebSocket + AOP로 알림 기능 구현](https://teamsparta.notion.site/WebSocket-AOP-5298c88d3d584a07a27fa1f006554ccd) | `AOP` `WebSocket` |
 | [QueryDSL로 통합검색 개발하기](https://teamsparta.notion.site/QueryDSL-013b19ffe4a14797808dbe22c22a3d55) |  `QueryDSL` `Fetch Join`|
 | [JWT 에서의 로그아웃](https://teamsparta.notion.site/JWT-8402baa778aa4a12b36bdd352eafa4b1) | `JWT` `BlackList Logout` |
