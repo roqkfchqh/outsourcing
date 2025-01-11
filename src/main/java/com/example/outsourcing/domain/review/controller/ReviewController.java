@@ -49,13 +49,19 @@ public class ReviewController {
     @GetMapping
     public ResponseEntity<Page<?>> getReviews(
         @RequestParam(required = false) Long shopId,
+        @RequestParam(required = false) Integer minRating,
+        @RequestParam(required = false) Integer maxRating,
         @Auth AuthUser authUser,
         @RequestParam(defaultValue = PAGE_COUNT) int page,
         @RequestParam(defaultValue = PAGE_SIZE) int size
     ) {
         Pageable pageable = validatePageSize(page, size);
+
         if (shopId != null) {
-            Page<ShopReviewResponseDto> reviews = reviewService.getShopReviews(shopId, pageable);
+            int min = (minRating != null) ? minRating : 0;
+            int max = (maxRating != null) ? maxRating : 5;
+            Page<ShopReviewResponseDto> reviews = reviewService.getShopReviews(shopId, min, max,
+                pageable);
             return ResponseEntity.ok(reviews);
         }
         if (authUser.id() != null) {
