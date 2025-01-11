@@ -44,6 +44,8 @@ public class Order extends Timestamped {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    private boolean cannotReview = false;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
@@ -70,6 +72,11 @@ public class Order extends Timestamped {
             case COMPLETED -> throw new IllegalStateException("이미 완료된 주문입니다.");
             default -> throw new IllegalStateException("알 수 없는 상태입니다: " + this.status);
         }
+    }
+
+    public void markCannotReview() {
+        // 리뷰 상태 관리 필드 업데이트
+        this.cannotReview = true;
     }
 
     public Order(BigDecimal totalPrice, User user, Status status, List<OrderMenu> orderMenus) {

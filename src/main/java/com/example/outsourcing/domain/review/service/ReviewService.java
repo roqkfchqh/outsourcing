@@ -36,6 +36,10 @@ public class ReviewService {
     public UserReviewResponseDto createReview(AuthUser user, Long orderId,
         ReviewRequestDto dto) {
         Order order = findOrder(orderId);
+        //리뷰 가능 여부 확인
+        if (order.isCannotReview()) {
+            throw new InvalidRequestException(ErrorCode.CANNOT_REVIEW);
+        }
         // 주문 완료여부 확인
         if (order.getStatus() != Status.COMPLETED) {
             throw new InvalidRequestException(ErrorCode.NOT_COMPLETED_ORDER);
