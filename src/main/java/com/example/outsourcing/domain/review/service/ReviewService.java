@@ -13,6 +13,7 @@ import com.example.outsourcing.domain.review.dto.UserReviewResponseDto;
 import com.example.outsourcing.domain.review.entity.Review;
 import com.example.outsourcing.domain.review.mapper.ReviewMapper;
 import com.example.outsourcing.domain.review.repository.ReviewRepository;
+import com.example.outsourcing.domain.review.repository.ReviewRepositoryCustom;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
@@ -31,6 +32,7 @@ public class ReviewService {
     public final ReviewRepository reviewRepository;
     public final OrderRepository orderRepository;
     public final ShopRepository shopRepository;
+    public final ReviewRepositoryCustom reviewRepositoryCustom;
 
     @Transactional
     public UserReviewResponseDto createReview(AuthUser user, Long orderId,
@@ -67,18 +69,20 @@ public class ReviewService {
         return ReviewMapper.toUserReviewDto(review);
     }
 
-    public Page<ShopReviewResponseDto> getShopReviews(Long shopId, Pageable pageable) {
+    public Page<ShopReviewResponseDto> getShopReviews(Long shopId, int minRating, int maxRating,
+        Pageable pageable) {
         Shop shop = shopRepository.findById(shopId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
         if (shop.isDeleted()) {
             throw new ForbiddenException(ErrorCode.SHOP_DELETED);
         }
-        Page<Review> reviews = reviewRepository.findAllByShopId(shopId, pageable);
+        Page<Review> reviews = reviewRepositoryCustom.findShopReviews(shopId, minRating, maxRating,
+            pageable);
         return reviews.map(ReviewMapper::toShopReviewDto);
     }
 
     public Page<UserReviewResponseDto> getUserReviews(AuthUser user, Pageable pageable) {
-        Page<Review> reviews = reviewRepository.findAllByUserId(user.id(), pageable);
+        Page<Review> reviews = reviewRepositoryCustom.findUserReviews(user.id(), pageable);
         return reviews.map(ReviewMapper::toUserReviewDto);
     }
 
