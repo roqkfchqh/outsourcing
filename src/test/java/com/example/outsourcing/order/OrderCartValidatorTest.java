@@ -73,8 +73,8 @@ class OrderCartValidatorTest {
         ReflectionTestUtils.setField(shop, "name", "Test Shop");
         ReflectionTestUtils.setField(shop, "minOrderPrice", BigDecimal.valueOf(50));
         ReflectionTestUtils.setField(shop, "isDeleted", false);
-        ReflectionTestUtils.setField(shop, "open", LocalTime.of(9, 0));
-        ReflectionTestUtils.setField(shop, "close", LocalTime.of(23, 0));
+        ReflectionTestUtils.setField(shop, "open", LocalTime.of(0, 0));
+        ReflectionTestUtils.setField(shop, "close", LocalTime.of(23, 59));
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
