@@ -30,7 +30,6 @@ public class ReviewService {
     public final OrderRepository orderRepository;
     public final ShopRepository shopRepository;
     public final ReviewRepositoryCustom reviewRepositoryCustom;
-    public final ReviewValidator validator;
 
     @Transactional
     public UserReviewResponseDto createReview(AuthUser user, Long orderId,
@@ -39,7 +38,9 @@ public class ReviewService {
         order.validateIsCompleted();
         order.isCannotReview();
         order.validateOwnership(user);
-        validator.reviewAlreadyExist(orderId);
+        if (reviewRepository.existsByOrderId(orderId)) {
+            throw new InvalidRequestException(ErrorCode.ALREADY_REVIEWED);
+        }
 
         Shop shop = order.getShop();
         shop.validateIsActive();

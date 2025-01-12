@@ -12,7 +12,6 @@ import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.order.entity.OrderMenu;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.order.service.OrderService;
-import com.example.outsourcing.domain.order.service.OrderValidator;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.user.entity.User;
@@ -34,9 +33,6 @@ public class GetOrderTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private OrderValidator orderValidator;
 
     @Test
     void getOrder_ShouldReturnOrderResponse_유효한_값() {

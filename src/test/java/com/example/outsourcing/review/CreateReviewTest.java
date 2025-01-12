@@ -17,7 +17,6 @@ import com.example.outsourcing.domain.review.dto.UserReviewResponseDto;
 import com.example.outsourcing.domain.review.entity.Review;
 import com.example.outsourcing.domain.review.repository.ReviewRepository;
 import com.example.outsourcing.domain.review.service.ReviewService;
-import com.example.outsourcing.domain.review.service.ReviewValidator;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.user.entity.User;
@@ -43,9 +42,6 @@ public class CreateReviewTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private ReviewValidator validator;
 
     @Test
     void createReview_ShouldSaveReview_유효한_값() {

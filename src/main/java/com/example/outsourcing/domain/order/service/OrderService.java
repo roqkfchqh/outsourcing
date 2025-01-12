@@ -2,6 +2,7 @@ package com.example.outsourcing.domain.order.service;
 
 import com.example.outsourcing.domain.cart.entity.Cart;
 import com.example.outsourcing.domain.common.dto.AuthUser;
+import com.example.outsourcing.domain.common.exception.ForbiddenException;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.order.dto.OrderMenuResponseDto;
@@ -17,6 +18,7 @@ import com.example.outsourcing.domain.user.entity.User;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +33,6 @@ public class OrderService {
     private final OrderCartValidator cartValidator;
     private final OrderCartService orderCartService;
     private final OrderFactory orderFactory;
-    private final OrderValidator orderValidator;
 
     @Transactional
     public OrderResponseDto createOrder(AuthUser user) {
@@ -54,7 +55,8 @@ public class OrderService {
 
     @Transactional
     public Order toNextStatus(AuthUser user, Long orderId) {
-        Order order = orderValidator.userIsOrderShopOwner(user, orderId);
+        Order order = orderRepository.findOrderByOwner(orderId, user.id())
+            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
         order.validateIsNotCompleted();
         order.nextStatus();
         return order;
@@ -62,7 +64,8 @@ public class OrderService {
 
     @Transactional
     public Long rejectOrder(AuthUser user, Long orderId) {
-        Order order = orderValidator.userIsOrderShopOwner(user, orderId);
+        Order order = orderRepository.findOrderByOwner(orderId, user.id())
+            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
         order.validateIsPending();
         Long userId = order.getUser().getId();
         orderRepository.deleteById(orderId);
@@ -71,7 +74,10 @@ public class OrderService {
 
     public OrderResponseDto getOrder(AuthUser user, Long orderId) {
         Order order = findOrder(orderId);
-        orderValidator.canGetOrder(user, orderId, order);
+        if (!Objects.equals(order.getUser().getId(), user.id()) &&
+            !orderRepository.existsOrderByOwner(orderId, user.id())) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
+        }
         Shop shop = order.getShop();
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
             .map(OrderMenuMapper::toDto)
