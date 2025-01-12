@@ -1,6 +1,8 @@
 package com.example.outsourcing.domain.shop.entity;
 
+import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.entity.Timestamped;
+import com.example.outsourcing.domain.common.exception.ForbiddenException;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.user.entity.User;
@@ -14,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -77,5 +80,30 @@ public class Shop extends Timestamped {
     // 소프트 딜리트 메서드 추가
     public void markAsDeleted() {
         this.isDeleted = true;
+    }
+
+    public void validateIsActive() {
+        if (isDeleted) {
+            throw new InvalidRequestException(ErrorCode.SHOP_DELETED);
+        }
+    }
+
+    public void validateIsOpened() {
+        LocalTime now = LocalTime.now();
+        if (now.isBefore(getOpen()) || now.isAfter(getClose())) {
+            throw new InvalidRequestException(ErrorCode.SHOP_CLOSED);
+        }
+    }
+
+    public void validateMinOrderPrice(BigDecimal totalPrice) {
+        if (totalPrice.compareTo(getMinOrderPrice()) < 0) {
+            throw new InvalidRequestException(ErrorCode.MINIMUM_ORDER_NOT_MET);
+        }
+    }
+
+    public void validateOwnership(AuthUser authUser) {
+        if (!Objects.equals(user.getId(), authUser.id())) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
+        }
     }
 }

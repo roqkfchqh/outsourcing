@@ -1,6 +1,11 @@
 package com.example.outsourcing.domain.order.entity;
 
+import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.entity.Timestamped;
+import com.example.outsourcing.domain.common.exception.ForbiddenException;
+import com.example.outsourcing.domain.common.exception.InvalidRequestException;
+import com.example.outsourcing.domain.common.exception.base.ErrorCode;
+import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.user.entity.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -18,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -79,21 +85,40 @@ public class Order extends Timestamped {
         this.cannotReview = true;
     }
 
-    public Order(BigDecimal totalPrice, User user, Status status, List<OrderMenu> orderMenus) {
-        this.totalPrice = totalPrice;
-        this.user = user;
-        this.status = status;
-        this.orderMenus = orderMenus;
+    public void isCannotReview() {
+        if (cannotReview) {
+            throw new InvalidRequestException(ErrorCode.CANNOT_REVIEW);
+        }
     }
 
-    public Order(User user, Status status, List<OrderMenu> orderMenus) {
-        this.user = user;
-        this.status = status;
-        this.orderMenus = orderMenus;
+    public void validateIsPending() {
+        if (status != Status.PENDING) {
+            throw new InvalidRequestException(ErrorCode.CANNOT_CHANGE_STATUS);
+        }
     }
 
-    public Order(User user, Status status) {
-        this.user = user;
-        this.status = status;
+    public void validateIsNotCompleted() {
+        if (status == Status.COMPLETED) {
+            throw new InvalidRequestException(ErrorCode.ALREADY_COMPLETED);
+        }
+    }
+
+    public void validateIsCompleted() {
+        if (status != Status.COMPLETED) {
+            throw new InvalidRequestException(ErrorCode.ALREADY_COMPLETED);
+        }
+    }
+
+    public Shop getShop() {
+        return orderMenus.stream()
+            .findFirst()
+            .map(orderMenu -> orderMenu.getMenu().getShop())
+            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
+    }
+
+    public void validateOwnership(AuthUser authUser) {
+        if (!Objects.equals(user.getId(), authUser.id())) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,6 +46,10 @@ public class Cart {
         if (menuItem.getQuantity() == 0) {
             items.remove(menuItem);
         }
+    }
+
+    public List<Long> getMenuIds() {
+        return items.stream().map(MenuItem::getMenuId).collect(Collectors.toList());
     }
 
     @Getter

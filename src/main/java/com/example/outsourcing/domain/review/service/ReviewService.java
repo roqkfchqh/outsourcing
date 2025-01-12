@@ -36,15 +36,13 @@ public class ReviewService {
     public UserReviewResponseDto createReview(AuthUser user, Long orderId,
         ReviewRequestDto dto) {
         Order order = findOrder(orderId);
-        validator.canReview(order);
-        validator.userIsOrderOwner(order, user);
+        order.validateIsCompleted();
+        order.isCannotReview();
+        order.validateOwnership(user);
         validator.reviewAlreadyExist(orderId);
 
-        Shop shop = order.getOrderMenus().stream()
-            .findFirst()
-            .map(orderMenu -> orderMenu.getMenu().getShop())
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
-        validator.shopIsActive(shop);
+        Shop shop = order.getShop();
+        shop.validateIsActive();
 
         Review review = Review.of(User.fromAuthUser(user), shop, order, dto.content(),
             dto.rating());
@@ -55,7 +53,7 @@ public class ReviewService {
     public Page<ShopReviewResponseDto> getShopReviews(Long shopId, int minRating, int maxRating,
         Pageable pageable) {
         Shop shop = findShop(shopId);
-        validator.shopIsActive(shop);
+        shop.validateIsActive();
         Page<Review> reviews = reviewRepositoryCustom.findShopReviews(shopId, minRating, maxRating,
             pageable);
         return reviews.map(ReviewMapper::toShopReviewDto);
@@ -69,7 +67,7 @@ public class ReviewService {
     @Transactional
     public void deleteReview(AuthUser user, Long reviewId) {
         Review review = findReview(reviewId);
-        validator.userIsReviewOwner(user, review);
+        review.validateOwnership(user);
         reviewRepository.deleteById(reviewId);
     }
 

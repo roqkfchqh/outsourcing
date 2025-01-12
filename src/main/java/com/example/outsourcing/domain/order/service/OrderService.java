@@ -55,7 +55,7 @@ public class OrderService {
     @Transactional
     public Order toNextStatus(AuthUser user, Long orderId) {
         Order order = orderValidator.userIsOrderShopOwner(user, orderId);
-        orderValidator.isAlreadyCompleted(order);
+        order.validateIsNotCompleted();
         order.nextStatus();
         return order;
     }
@@ -63,7 +63,7 @@ public class OrderService {
     @Transactional
     public Long rejectOrder(AuthUser user, Long orderId) {
         Order order = orderValidator.userIsOrderShopOwner(user, orderId);
-        orderValidator.isPending(order);
+        order.validateIsPending();
         Long userId = order.getUser().getId();
         orderRepository.deleteById(orderId);
         return userId;
@@ -72,10 +72,7 @@ public class OrderService {
     public OrderResponseDto getOrder(AuthUser user, Long orderId) {
         Order order = findOrder(orderId);
         orderValidator.canGetOrder(user, orderId, order);
-        Shop shop = order.getOrderMenus().stream()
-            .findFirst()
-            .map(orderMenu -> orderMenu.getMenu().getShop())
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
+        Shop shop = order.getShop();
         List<OrderMenuResponseDto> orderMenusDto = order.getOrderMenus().stream()
             .map(OrderMenuMapper::toDto)
             .toList();
@@ -85,8 +82,8 @@ public class OrderService {
 
     public List<OrderResponseDto> getOrdersByShop(AuthUser authUser, Long shopId) {
         Shop shop = findShop(shopId);
-        orderValidator.shopIsActive(shop);
-        orderValidator.userIsShopOwner(authUser, shop);
+        shop.validateIsActive();
+        shop.validateOwnership(authUser);
         List<Order> orders = orderRepository.findAllByShopId(shopId);
 
         return orders.stream()
@@ -107,7 +104,7 @@ public class OrderService {
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.ORDER_NOT_FOUND));
     }
 
-    private static BigDecimal getTotalPrice(Cart cart, Map<Long, Menu> menus) {
+    private BigDecimal getTotalPrice(Cart cart, Map<Long, Menu> menus) {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (Cart.MenuItem item : cart.getItems()) {
             Menu menu = menus.get(item.getMenuId());

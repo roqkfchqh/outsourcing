@@ -1,6 +1,9 @@
 package com.example.outsourcing.domain.review.entity;
 
+import com.example.outsourcing.domain.common.dto.AuthUser;
 import com.example.outsourcing.domain.common.entity.Timestamped;
+import com.example.outsourcing.domain.common.exception.ForbiddenException;
+import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.user.entity.User;
@@ -12,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,13 +44,6 @@ public class Review extends Timestamped {
     private String content;
     private int rating;
 
-    public Review(Long reviewId, User user, String content, int rating) {
-        this.id = reviewId;
-        this.user = user;
-        this.content = content;
-        this.rating = rating;
-    }
-
     public static Review of(User user, Shop shop, Order order, String content, int rating) {
         Review review = new Review();
         review.user = user;
@@ -55,5 +52,11 @@ public class Review extends Timestamped {
         review.content = content;
         review.rating = rating;
         return review;
+    }
+    
+    public void validateOwnership(AuthUser authUser) {
+        if (!Objects.equals(user.getId(), authUser.id())) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION);
+        }
     }
 }
