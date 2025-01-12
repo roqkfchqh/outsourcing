@@ -60,4 +60,10 @@ public class Menu {
         this.description = description;
         this.price = price;
     }
+
+    public void validateIsActive() {
+        if (isDeleted()) {
+            throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
+        }
+    }
 }

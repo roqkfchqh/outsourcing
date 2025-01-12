@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ToNextStatusTest {
@@ -33,7 +34,9 @@ public class ToNextStatusTest {
     void toNextStatus_ShouldUpdateOrderStatus_유효한_값() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
-        Order order = new Order(User.fromAuthUser(user), Status.PENDING);   //Pending에서 accept로만 해봤음
+        Order order = new Order();
+        ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
+        ReflectionTestUtils.setField(order, "status", Status.PENDING);
 
         when(orderRepository.findOrderByOwner(orderId, user.id())).thenReturn(Optional.of(order));
 

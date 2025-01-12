@@ -36,6 +36,11 @@ public class User extends Timestamped {
         this.userRole = userRole;
     }
 
+    public User(Long id, String username) {
+        this.id = id;
+        this.username = username;
+    }
+
     public static User fromAuthUser(AuthUser authUser) {
         User user = new User();
         user.id = authUser.id();

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.outsourcing.domain.cart.entity.Cart;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
-import com.example.outsourcing.domain.order.service.OrderCartValidation;
+import com.example.outsourcing.domain.order.service.OrderCartValidator;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
@@ -22,12 +22,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-class OrderCartValidationTest {
+class OrderCartValidatorTest {
 
     @InjectMocks
-    private OrderCartValidation orderCartValidation;
+    private OrderCartValidator orderCartValidator;
 
     @Mock
     private MenuRepository menuRepository;
@@ -38,18 +39,15 @@ class OrderCartValidationTest {
     @Test
     void validateCartAndReturnMenu_ShouldReturnMenus_유효한_값() {
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 2)));
-        Menu menu = new Menu(1L, "Test Menu", BigDecimal.valueOf(100),
-            new Shop(
-                1L,
-                "Test Shop",
-                BigDecimal.valueOf(50),
-                LocalTime.parse("09:00:00"),
-                LocalTime.parse("18:00:00"),
-                false));
+        Menu menu = new Menu();
+        ReflectionTestUtils.setField(menu, "id", 1L);
+        ReflectionTestUtils.setField(menu, "name", "Test Menu");
+        ReflectionTestUtils.setField(menu, "price", BigDecimal.valueOf(100));
+        ReflectionTestUtils.setField(menu, "shop", new Shop());
 
         when(menuRepository.findByIdIn(List.of(1L))).thenReturn(List.of(menu));
 
-        Map<Long, Menu> result = orderCartValidation.validateCartAndReturnMenu(cart);
+        Map<Long, Menu> result = orderCartValidator.validateCartAndReturnMenu(cart);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -62,24 +60,31 @@ class OrderCartValidationTest {
         when(menuRepository.findByIdIn(List.of(1L))).thenReturn(List.of());
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateCartAndReturnMenu(cart));
+            () -> orderCartValidator.validateCartAndReturnMenu(cart));
     }
 
     @Test
     void validateShop_ShouldReturnShop_유효한_값() {
         Long shopId = 1L;
         BigDecimal totalPrice = BigDecimal.valueOf(100);
-        Shop shop = new Shop(shopId, "Test Shop", BigDecimal.valueOf(50),
-            LocalTime.parse("09:00:00"), LocalTime.parse("21:00:00"), false);
+
+        Shop shop = new Shop();
+        ReflectionTestUtils.setField(shop, "id", shopId);
+        ReflectionTestUtils.setField(shop, "name", "Test Shop");
+        ReflectionTestUtils.setField(shop, "minOrderPrice", BigDecimal.valueOf(50));
+        ReflectionTestUtils.setField(shop, "isDeleted", false);
+        ReflectionTestUtils.setField(shop, "open", LocalTime.of(9, 0));
+        ReflectionTestUtils.setField(shop, "close", LocalTime.of(23, 0));
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
-        Shop result = orderCartValidation.validateShop(shopId, totalPrice);
+        Shop result = orderCartValidator.validateShop(shopId, totalPrice);
 
         assertNotNull(result);
         assertEquals(shopId, result.getId());
         assertEquals("Test Shop", result.getName());
     }
+
 
     @Test
     void validateShop_ShouldThrowException_가게를_찾을수없을때() {
@@ -89,33 +94,61 @@ class OrderCartValidationTest {
         when(shopRepository.findById(shopId)).thenReturn(Optional.empty());
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateShop(shopId, totalPrice));
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
     }
 
     @Test
     void validateShop_ShouldThrowException_가게가_폐업했을때() {
         Long shopId = 1L;
         BigDecimal totalPrice = BigDecimal.valueOf(100);
-        Shop shop = new Shop(shopId, "Test Shop", BigDecimal.valueOf(50),
-            LocalTime.parse("09:00:00"), LocalTime.parse("18:00:00"), true);
+        Shop shop = new Shop();
+        ReflectionTestUtils.setField(shop, "id", shopId);
+        ReflectionTestUtils.setField(shop, "name", "Test Shop");
+        ReflectionTestUtils.setField(shop, "isDeleted", true);
+        ReflectionTestUtils.setField(shop, "open", LocalTime.of(9, 0));
+        ReflectionTestUtils.setField(shop, "close", LocalTime.of(18, 0));
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateShop(shopId, totalPrice));
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
     }
 
     @Test
     void validateShop_ShouldThrowException_최소주문금액_미달일때() {
         Long shopId = 1L;
         BigDecimal totalPrice = BigDecimal.valueOf(30); // 최소 주문 금액 미달
-        Shop shop = new Shop(shopId, "Test Shop", BigDecimal.valueOf(50),
-            LocalTime.parse("09:00:00"), LocalTime.parse("18:00:00"), false);
+        Shop shop = new Shop();
+        ReflectionTestUtils.setField(shop, "id", shopId);
+        ReflectionTestUtils.setField(shop, "name", "Test Shop");
+        ReflectionTestUtils.setField(shop, "minOrderPrice", BigDecimal.valueOf(50));
+        ReflectionTestUtils.setField(shop, "isDeleted", false);
+        ReflectionTestUtils.setField(shop, "open", LocalTime.of(9, 0));
+        ReflectionTestUtils.setField(shop, "close", LocalTime.of(18, 0));
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateShop(shopId, totalPrice));
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
+    }
+
+    @Test
+    void validateShop_ShouldThrowException_영업시간이_아닐때() {
+        Long shopId = 1L;
+        BigDecimal totalPrice = BigDecimal.valueOf(100);
+
+        Shop shop = new Shop();
+        ReflectionTestUtils.setField(shop, "id", shopId);
+        ReflectionTestUtils.setField(shop, "name", "Test Shop");
+        ReflectionTestUtils.setField(shop, "minOrderPrice", BigDecimal.valueOf(50));
+        ReflectionTestUtils.setField(shop, "isDeleted", false);
+        ReflectionTestUtils.setField(shop, "open", LocalTime.of(9, 0));
+        ReflectionTestUtils.setField(shop, "close", LocalTime.of(10, 0));
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
+
+        assertThrows(InvalidRequestException.class,
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
     }
 
 }

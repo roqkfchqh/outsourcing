@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class OrderFactoryTest {
@@ -25,9 +26,21 @@ class OrderFactoryTest {
 
     @Test
     void createOrder_ShouldCreateOrder_유효한_값() {
-        User user = new User(1L, "Test User");
-        Menu menu = new Menu(1L, "Test Menu", BigDecimal.valueOf(10),
-            new Shop(1L, "Test Shop", BigDecimal.valueOf(50), null, null, false));
+        User user = new User();
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(user, "username", "Test User");
+
+        Shop shop = new Shop();
+        ReflectionTestUtils.setField(shop, "id", 1L);
+        ReflectionTestUtils.setField(shop, "name", "Test Shop");
+        ReflectionTestUtils.setField(shop, "minOrderPrice", BigDecimal.valueOf(50));
+
+        Menu menu = new Menu();
+        ReflectionTestUtils.setField(menu, "id", 1L);
+        ReflectionTestUtils.setField(menu, "name", "Test Menu");
+        ReflectionTestUtils.setField(menu, "price", BigDecimal.valueOf(10));
+        ReflectionTestUtils.setField(menu, "shop", shop);
+
         Cart.MenuItem menuItem = new Cart.MenuItem(1L, 2);
 
         Order order = orderFactory.createOrder(user, BigDecimal.valueOf(20), Map.of(1L, menu),
@@ -41,7 +54,9 @@ class OrderFactoryTest {
 
     @Test
     void createOrder_ShouldHandleEmptyMenuItems_메뉴리스트_비어있을때() {
-        User user = new User(1L, "Test User");
+        User user = new User();
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(user, "username", "Test User");
 
         Order order = orderFactory.createOrder(user, BigDecimal.ZERO, Map.of(), List.of());
 

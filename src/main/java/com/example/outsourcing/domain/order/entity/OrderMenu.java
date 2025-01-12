@@ -45,9 +45,4 @@ public class OrderMenu {
         this.menu = menu;
         this.quantity = quantity;
     }
-
-    public void assignOrder(Order order) {
-        this.order = order;
-    }
-
 }
