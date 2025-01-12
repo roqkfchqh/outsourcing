@@ -1,10 +1,12 @@
 package com.example.outsourcing.domain.user.controller;
 
+import com.example.outsourcing.domain.common.dto.BaseMapper;
+import com.example.outsourcing.domain.common.dto.BaseResponseDto;
+import com.example.outsourcing.domain.common.dto.MessageResponseDto;
 import com.example.outsourcing.domain.user.dto.LoginRequestDto;
 import com.example.outsourcing.domain.user.dto.SignUpRequestDto;
 import com.example.outsourcing.domain.user.dto.UserResponseDto;
 import com.example.outsourcing.domain.user.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,20 +24,27 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody SignUpRequestDto requestDto) {
+    public ResponseEntity<BaseResponseDto<MessageResponseDto>> register(
+        @Valid @RequestBody SignUpRequestDto requestDto) {
         userService.register(requestDto);
-        return ResponseEntity.ok("회원가입에 성공했습니다.");
+        MessageResponseDto data = new MessageResponseDto(
+            requestDto.getEmail() + " 님 회원가입에 성공했습니다.");
+        return ResponseEntity.ok(BaseMapper.map(data));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto) {
+    public ResponseEntity<BaseResponseDto<UserResponseDto>> login(
+        @Valid @RequestBody LoginRequestDto requestDto) {
         String token = userService.login(requestDto);
-        return ResponseEntity.ok(new UserResponseDto(token, "로그인에 성공했습니다."));
+        MessageResponseDto data = new MessageResponseDto(requestDto.getEmail() + " 님 로그인에 성공했습니다.");
+        return ResponseEntity.ok(BaseMapper.map(new UserResponseDto(token, data)));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<BaseResponseDto<MessageResponseDto>> logout(
+        @RequestHeader("Authorization") String token) {
         userService.logout(token);
-        return ResponseEntity.ok("로그아웃에 성공했습니다.");
+        MessageResponseDto data = new MessageResponseDto("로그아웃에 성공했습니다.");
+        return ResponseEntity.ok(BaseMapper.map(data));
     }
 }

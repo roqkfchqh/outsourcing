@@ -4,6 +4,9 @@ import com.example.outsourcing.domain.common.annotation.Auth;
 import com.example.outsourcing.domain.common.authorization.OwnerCheck;
 import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
+import com.example.outsourcing.domain.common.dto.BaseMapper;
+import com.example.outsourcing.domain.common.dto.BaseResponseDto;
+import com.example.outsourcing.domain.common.dto.MessageResponseDto;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
 import com.example.outsourcing.domain.order.service.OrderService;
 import java.util.List;
@@ -31,11 +34,11 @@ public class OrderController {
      */
     @UserCheck
     @PostMapping
-    public ResponseEntity<OrderResponseDto> createOrder(
+    public ResponseEntity<BaseResponseDto<OrderResponseDto>> createOrder(
         @Auth AuthUser authUser
     ) {
         OrderResponseDto order = orderService.createOrder(authUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(order);
+        return ResponseEntity.status(HttpStatus.CREATED).body(BaseMapper.map(order));
     }
 
     /**
@@ -43,12 +46,13 @@ public class OrderController {
      */
     @OwnerCheck
     @PatchMapping("/{orderId}")
-    public ResponseEntity<Void> toNextStatus(
+    public ResponseEntity<BaseResponseDto<MessageResponseDto>> toNextStatus(
         @Auth AuthUser authUser,
         @PathVariable Long orderId
     ) {
         orderService.toNextStatus(authUser, orderId);
-        return ResponseEntity.ok().build();
+        MessageResponseDto data = new MessageResponseDto(orderId + " 번 주문이 다음 상태로 변경되었습니다.");
+        return ResponseEntity.ok(BaseMapper.map(data));
     }
 
     /**
@@ -56,12 +60,12 @@ public class OrderController {
      */
     @UserCheck
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponseDto> getOrder(
+    public ResponseEntity<BaseResponseDto<OrderResponseDto>> getOrder(
         @Auth AuthUser authUser,
         @PathVariable Long orderId
     ) {
         OrderResponseDto order = orderService.getOrder(authUser, orderId);
-        return ResponseEntity.ok(order);
+        return ResponseEntity.ok(BaseMapper.map(order));
     }
 
     /**
@@ -69,12 +73,13 @@ public class OrderController {
      */
     @OwnerCheck
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> rejectOrder(
+    public ResponseEntity<BaseResponseDto<MessageResponseDto>> rejectOrder(
         @Auth AuthUser authUser,
         @PathVariable Long orderId
     ) {
         orderService.rejectOrder(authUser, orderId);
-        return ResponseEntity.noContent().build();
+        MessageResponseDto data = new MessageResponseDto(orderId + " 번 주문을 거절하였습니다.");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(BaseMapper.map(data));
     }
 
     /**
@@ -82,11 +87,11 @@ public class OrderController {
      */
     @OwnerCheck
     @GetMapping
-    public ResponseEntity<List<OrderResponseDto>> getOrdersByShop(
+    public ResponseEntity<BaseResponseDto<List<OrderResponseDto>>> getOrdersByShop(
         @Auth AuthUser authUser,
         @RequestParam Long shopId
     ) {
         List<OrderResponseDto> orders = orderService.getOrdersByShop(authUser, shopId);
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.ok(BaseMapper.map(orders));
     }
 }

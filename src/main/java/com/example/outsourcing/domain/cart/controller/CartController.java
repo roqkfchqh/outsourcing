@@ -5,7 +5,11 @@ import com.example.outsourcing.domain.cart.service.CartService;
 import com.example.outsourcing.domain.common.annotation.Auth;
 import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
+import com.example.outsourcing.domain.common.dto.BaseMapper;
+import com.example.outsourcing.domain.common.dto.BaseResponseDto;
+import com.example.outsourcing.domain.common.dto.MessageResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,34 +27,35 @@ public class CartController {
 
     @UserCheck
     @GetMapping("/items")
-    public ResponseEntity<Cart> getCart(@Auth AuthUser authUser) {
+    public ResponseEntity<BaseResponseDto<Cart>> getCart(@Auth AuthUser authUser) {
         Cart cart = cartService.getCart(authUser);
 
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok(BaseMapper.map(cart));
     }
 
     @UserCheck
     @PostMapping("/items/{menuId}")
-    public ResponseEntity<Cart> addItemToCart(@Auth AuthUser authUser, @PathVariable Long menuId) {
+    public ResponseEntity<BaseResponseDto<Cart>> addItemToCart(@Auth AuthUser authUser,
+        @PathVariable Long menuId) {
         Cart cart = cartService.addItemToCart(authUser, menuId);
 
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok(BaseMapper.map(cart));
     }
 
     @UserCheck
     @DeleteMapping("/items/{menuId}")
-    public ResponseEntity<Cart> removeItemFromCart(@Auth AuthUser authUser,
+    public ResponseEntity<BaseResponseDto<Cart>> removeItemFromCart(@Auth AuthUser authUser,
         @PathVariable Long menuId) {
         Cart cart = cartService.removeItemFromCart(authUser, menuId);
 
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok(BaseMapper.map(cart));
     }
 
     @UserCheck
     @DeleteMapping("/items")
-    public ResponseEntity<Void> clearCart(@Auth AuthUser authUser) {
+    public ResponseEntity<BaseResponseDto<MessageResponseDto>> clearCart(@Auth AuthUser authUser) {
         cartService.clearCart(authUser);
-
-        return ResponseEntity.noContent().build();
+        MessageResponseDto data = new MessageResponseDto(authUser.email() + " 님의 장바구니가 초기화되었습니다.");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(BaseMapper.map(data));
     }
 }

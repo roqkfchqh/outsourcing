@@ -1,5 +1,7 @@
 package com.example.outsourcing.domain.search.controller;
 
+import com.example.outsourcing.domain.common.dto.BaseMapper;
+import com.example.outsourcing.domain.common.dto.BaseResponseDto;
 import com.example.outsourcing.domain.search.dto.SearchResponseDto;
 import com.example.outsourcing.domain.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +17,9 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping("/search")
-    public ResponseEntity<SearchResponseDto> search(@RequestParam String keyword) {
+    public ResponseEntity<BaseResponseDto<SearchResponseDto>> search(@RequestParam String keyword) {
         SearchResponseDto searchResult = searchService.searchAll(keyword);
 
-        return ResponseEntity.ok(searchResult);
+        return ResponseEntity.ok(BaseMapper.map(searchResult));
     }
 }

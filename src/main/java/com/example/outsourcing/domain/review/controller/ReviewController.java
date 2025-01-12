@@ -3,6 +3,9 @@ package com.example.outsourcing.domain.review.controller;
 import com.example.outsourcing.domain.common.annotation.Auth;
 import com.example.outsourcing.domain.common.authorization.UserCheck;
 import com.example.outsourcing.domain.common.dto.AuthUser;
+import com.example.outsourcing.domain.common.dto.BaseMapper;
+import com.example.outsourcing.domain.common.dto.BaseResponseDto;
+import com.example.outsourcing.domain.common.dto.MessageResponseDto;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.review.dto.ReviewRequestDto;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,17 +41,17 @@ public class ReviewController {
 
     @UserCheck
     @PostMapping
-    public ResponseEntity<UserReviewResponseDto> createReview(
+    public ResponseEntity<BaseResponseDto<UserReviewResponseDto>> createReview(
         @Auth AuthUser authUser,
         @RequestParam Long orderId,
         @RequestBody @Valid ReviewRequestDto dto
     ) {
         UserReviewResponseDto review = reviewService.createReview(authUser, orderId, dto);
-        return ResponseEntity.ok(review);
+        return ResponseEntity.ok(BaseMapper.map(review));
     }
 
     @GetMapping
-    public ResponseEntity<Page<?>> getReviews(
+    public ResponseEntity<BaseResponseDto<Page<?>>> getReviews(
         @RequestParam(required = false) Long shopId,
         @RequestParam(required = false) Integer minRating,
         @RequestParam(required = false) Integer maxRating,
@@ -62,23 +66,24 @@ public class ReviewController {
             int max = (maxRating != null) ? maxRating : 5;
             Page<ShopReviewResponseDto> reviews = reviewService.getShopReviews(shopId, min, max,
                 pageable);
-            return ResponseEntity.ok(reviews);
+            return ResponseEntity.ok(BaseMapper.map(reviews));
         }
         if (authUser.id() != null) {
             Page<UserReviewResponseDto> reviews = reviewService.getUserReviews(authUser, pageable);
-            return ResponseEntity.ok(reviews);
+            return ResponseEntity.ok(BaseMapper.map(reviews));
         }
         return ResponseEntity.notFound().build();
     }
 
     @UserCheck
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<Void> deleteReview(
+    public ResponseEntity<BaseResponseDto<MessageResponseDto>> deleteReview(
         @Auth AuthUser authUser,
         @PathVariable Long reviewId
     ) {
         reviewService.deleteReview(authUser, reviewId);
-        return ResponseEntity.noContent().build();
+        MessageResponseDto data = new MessageResponseDto(reviewId + " 번 리뷰가 삭제되었습니다.");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(BaseMapper.map(data));
     }
 
     private Pageable validatePageSize(int page, int size) {

@@ -1,12 +1,7 @@
 package com.example.outsourcing.domain.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.example.outsourcing.domain.common.dto.MessageResponseDto;
 
-@Getter
-@AllArgsConstructor
-public class UserResponseDto {
+public record UserResponseDto(String bearerToken, MessageResponseDto message) {
 
-    private final String bearerToken;
-    private final String message;
 }
