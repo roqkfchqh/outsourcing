@@ -10,6 +10,7 @@ import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.order.entity.Order.Status;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.order.service.OrderService;
+import com.example.outsourcing.domain.order.service.OrderValidator;
 import com.example.outsourcing.domain.user.entity.User;
 import com.example.outsourcing.domain.user.entity.User.UserRole;
 import java.util.Optional;
@@ -29,11 +30,15 @@ public class RejectOrderTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private OrderValidator orderValidator;
+
     @Test
     void rejectOrder_ShouldDeleteOrder_유효한_값() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
         Order order = new Order();
+        ReflectionTestUtils.setField(order, "id", orderId);
         ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
         ReflectionTestUtils.setField(order, "status", Status.PENDING);
 
@@ -49,6 +54,7 @@ public class RejectOrderTest {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
         Order order = new Order();
+        ReflectionTestUtils.setField(order, "id", orderId);
         ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
         ReflectionTestUtils.setField(order, "status", Status.ACCEPT);
 

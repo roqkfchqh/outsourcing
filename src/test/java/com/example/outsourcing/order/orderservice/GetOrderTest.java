@@ -12,6 +12,7 @@ import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.order.entity.OrderMenu;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.order.service.OrderService;
+import com.example.outsourcing.domain.order.service.OrderValidator;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.user.entity.User;
@@ -33,6 +34,9 @@ public class GetOrderTest {
 
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private OrderValidator orderValidator;
 
     @Test
     void getOrder_ShouldReturnOrderResponse_유효한_값() {
@@ -62,25 +66,33 @@ public class GetOrderTest {
 
     @Test
     void getOrder_ShouldThrowForbiddenException_유효한_유저가_아닐때() {
-        AuthUser user = new AuthUser(2L, "tesghUser", UserRole.USER);
-        Long orderId = 1L;
+        // Given
+        AuthUser user = new AuthUser(2L, "testghUser", UserRole.USER); // 요청하는 사용자의 ID = 2
+        Long orderId = 1L; // 조회하려는 주문 ID
 
         Shop shop = new Shop();
         ReflectionTestUtils.setField(shop, "id", 1L);
         ReflectionTestUtils.setField(shop, "name", "Test Shop");
+
         Menu menu = new Menu();
         ReflectionTestUtils.setField(menu, "id", 1L);
         ReflectionTestUtils.setField(menu, "name", "Test Menu");
         ReflectionTestUtils.setField(menu, "shop", shop);
+
         OrderMenu orderMenu = new OrderMenu(menu, 2);
+
         Order order = new Order();
-        ReflectionTestUtils.setField(order, "user", new User());
+        ReflectionTestUtils.setField(order, "user", new User(1L, "owner")); // 주문 소유자 ID = 1
         ReflectionTestUtils.setField(order, "status", Order.Status.PENDING);
         ReflectionTestUtils.setField(order, "orderMenus", List.of(orderMenu));
 
+        // Mock 설정
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(orderRepository.existsOrderByOwner(orderId, user.id())).thenReturn(false);
+        when(orderRepository.existsOrderByOwner(orderId, user.id())).thenReturn(
+            false); // 사용자 2는 소유자가 아님
 
+        // When & Then
         assertThrows(ForbiddenException.class, () -> orderService.getOrder(user, orderId));
     }
+
 }

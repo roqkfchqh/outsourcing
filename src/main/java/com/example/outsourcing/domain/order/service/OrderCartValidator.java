@@ -28,6 +28,9 @@ public class OrderCartValidator {
 
         for (Cart.MenuItem item : cart.getItems()) {
             Menu menu = menus.get(item.getMenuId());
+            if (menu == null) {
+                throw new InvalidRequestException(ErrorCode.MENU_NOT_FOUND);
+            }
             menu.validateIsActive();
         }
         return menus;
