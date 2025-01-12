@@ -74,9 +74,7 @@ public class MenuService {
         Menu menu = validator.findMenuByIdOrThrow(menuId);
 
         //이미 삭제된 메뉴
-        if (menu.isDeleted()) {
-            throw new InvalidRequestException(ErrorCode.MENU_ALREADY_DELETED);
-        }
+        menu.validateIsActive();
 
         menu.update(menuRequestDto.getName(), menuRequestDto.getDescription(),
             menuRequestDto.getPrice());
@@ -93,9 +91,7 @@ public class MenuService {
         Menu menu = validator.findMenuByIdOrThrow(menuId);
 
         // 이미 삭제된 상태라면 예외 발생
-        if (menu.isDeleted()) {
-            throw new InvalidRequestException(ErrorCode.MENU_ALREADY_DELETED);
-        }
+        menu.validateIsActive();
 
         menu.markAsDeleted();
     }

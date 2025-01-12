@@ -55,8 +55,7 @@ public class OrderService {
 
     @Transactional
     public Order toNextStatus(AuthUser user, Long orderId) {
-        Order order = orderRepository.findOrderByOwner(orderId, user.id())
-            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
+        Order order = findOrderByOwner(user, orderId);
         order.validateIsNotCompleted();
         order.nextStatus();
         return order;
@@ -64,8 +63,7 @@ public class OrderService {
 
     @Transactional
     public Long rejectOrder(AuthUser user, Long orderId) {
-        Order order = orderRepository.findOrderByOwner(orderId, user.id())
-            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
+        Order order = findOrderByOwner(user, orderId);
         order.validateIsPending();
         Long userId = order.getUser().getId();
         orderRepository.deleteById(orderId);
@@ -124,5 +122,10 @@ public class OrderService {
     private Shop findShop(Long shopId) {
         return shopRepository.findById(shopId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
+    }
+
+    private Order findOrderByOwner(AuthUser user, Long orderId) {
+        return orderRepository.findOrderByOwner(orderId, user.id())
+            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_OPERATION));
     }
 }
