@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class DeleteReviewTest {
@@ -42,11 +43,15 @@ public class DeleteReviewTest {
     void deleteReview_ShouldThrowForbiddenException_리뷰_작성자가_아닐때() {
         AuthUser user = new AuthUser(2L, "notOwner", UserRole.USER);
         Long reviewId = 1L;
-        Review review = new Review(reviewId, new User(1L, "ownerUser"), "Test content", 5);
+
+        Review review = new Review();
+        ReflectionTestUtils.setField(review, "id", reviewId);
+        ReflectionTestUtils.setField(review, "user", new User(1L, "ownerUser"));
+        ReflectionTestUtils.setField(review, "content", "Test content");
+        ReflectionTestUtils.setField(review, "rating", 5);
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
         assertThrows(ForbiddenException.class, () -> reviewService.deleteReview(user, reviewId));
     }
-
 }

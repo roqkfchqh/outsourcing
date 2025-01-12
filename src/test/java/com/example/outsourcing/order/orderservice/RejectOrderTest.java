@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class RejectOrderTest {
@@ -32,7 +33,10 @@ public class RejectOrderTest {
     void rejectOrder_ShouldDeleteOrder_유효한_값() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
-        Order order = new Order(User.fromAuthUser(user), Status.PENDING);
+        Order order = new Order();
+        ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
+        ReflectionTestUtils.setField(order, "status", Status.PENDING);
+
         when(orderRepository.findOrderByOwner(orderId, user.id())).thenReturn(Optional.of(order));
 
         orderService.rejectOrder(user, orderId);
@@ -44,10 +48,12 @@ public class RejectOrderTest {
     void rejectOrder_ShouldThrowException_주문보류중인_상태가_아닐때() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.OWNER);
         Long orderId = 1L;
-        Order order = new Order(User.fromAuthUser(user), Status.ACCEPT);
+        Order order = new Order();
+        ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
+        ReflectionTestUtils.setField(order, "status", Status.ACCEPT);
+
         when(orderRepository.findOrderByOwner(orderId, user.id())).thenReturn(Optional.of(order));
 
         assertThrows(InvalidRequestException.class, () -> orderService.rejectOrder(user, orderId));
     }
-
 }

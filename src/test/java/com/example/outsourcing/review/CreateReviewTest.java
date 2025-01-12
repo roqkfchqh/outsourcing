@@ -22,7 +22,6 @@ import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.user.entity.User;
 import com.example.outsourcing.domain.user.entity.User.UserRole;
 import java.math.BigDecimal;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateReviewTest {
@@ -47,15 +47,23 @@ public class CreateReviewTest {
     void createReview_ShouldSaveReview_유효한_값() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
         Long orderId = 1L;
-        Shop shop = new Shop(1L, "Test Shop", BigDecimal.valueOf(50),
-            LocalTime.parse("09:00:00"),
-            LocalTime.parse("18:00:00"), false);
 
-        Menu menu = new Menu(1L, "Test Menu", BigDecimal.TEN, shop);
-        OrderMenu orderMenu = OrderMenu.of(menu, 2);
-        Order order = new Order(User.fromAuthUser(user), Order.Status.COMPLETED,
-            List.of(orderMenu));
-        orderMenu.assignOrder(order);
+        Shop shop = new Shop();
+        ReflectionTestUtils.setField(shop, "id", 1L);
+        ReflectionTestUtils.setField(shop, "name", "Test Shop");
+        ReflectionTestUtils.setField(shop, "minOrderPrice", BigDecimal.valueOf(50));
+
+        Menu menu = new Menu();
+        ReflectionTestUtils.setField(menu, "id", 1L);
+        ReflectionTestUtils.setField(menu, "name", "Test Menu");
+        ReflectionTestUtils.setField(menu, "price", BigDecimal.TEN);
+        ReflectionTestUtils.setField(menu, "shop", shop);
+
+        OrderMenu orderMenu = new OrderMenu(menu, 2);
+        Order order = new Order();
+        ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
+        ReflectionTestUtils.setField(order, "status", Order.Status.COMPLETED);
+        ReflectionTestUtils.setField(order, "orderMenus", List.of(orderMenu));
 
         ReviewRequestDto dto = new ReviewRequestDto("개맛있네", 5);
         Review review = Review.of(User.fromAuthUser(user), shop, order, dto.content(),
@@ -76,7 +84,10 @@ public class CreateReviewTest {
     void createReview_ShouldThrowInvalidRequestException_해당_주문에대한_리뷰가_이미_존재할때() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
         Long orderId = 1L;
-        Order order = new Order(User.fromAuthUser(user), Order.Status.COMPLETED, List.of());
+        Order order = new Order();
+        ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
+        ReflectionTestUtils.setField(order, "status", Order.Status.COMPLETED);
+        ReflectionTestUtils.setField(order, "orderMenus", List.of());
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(reviewRepository.existsByOrderId(orderId)).thenReturn(true);
@@ -91,7 +102,10 @@ public class CreateReviewTest {
     void createReview_ShouldThrowInvalidRequestException_주문이_완료된_상태가_아닐때() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
         Long orderId = 1L;
-        Order order = new Order(User.fromAuthUser(user), Order.Status.PENDING, List.of());
+        Order order = new Order();
+        ReflectionTestUtils.setField(order, "user", User.fromAuthUser(user));
+        ReflectionTestUtils.setField(order, "status", Order.Status.PENDING);
+        ReflectionTestUtils.setField(order, "orderMenus", List.of());
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
@@ -105,7 +119,10 @@ public class CreateReviewTest {
     void createReview_ShouldThrowForbiddenException_해당_주문을_실행한_사람이_아닐때() {
         AuthUser user = new AuthUser(1L, "testUser", UserRole.USER);
         Long orderId = 1L;
-        Order order = new Order(new User(2L, "anotherUser"), Order.Status.COMPLETED, List.of());
+        Order order = new Order();
+        ReflectionTestUtils.setField(order, "user", new User(2L, "anotherUser"));
+        ReflectionTestUtils.setField(order, "status", Order.Status.COMPLETED);
+        ReflectionTestUtils.setField(order, "orderMenus", List.of());
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
@@ -114,5 +131,4 @@ public class CreateReviewTest {
         assertThrows(ForbiddenException.class,
             () -> reviewService.createReview(user, orderId, dto));
     }
-
 }
