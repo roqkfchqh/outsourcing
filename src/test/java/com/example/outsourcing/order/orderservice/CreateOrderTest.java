@@ -18,7 +18,7 @@ import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.order.entity.OrderMenu;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
 import com.example.outsourcing.domain.order.service.OrderCartService;
-import com.example.outsourcing.domain.order.service.OrderCartValidation;
+import com.example.outsourcing.domain.order.service.OrderCartValidator;
 import com.example.outsourcing.domain.order.service.OrderFactory;
 import com.example.outsourcing.domain.order.service.OrderService;
 import com.example.outsourcing.domain.shop.entity.Menu;
@@ -45,7 +45,7 @@ class CreateOrderTest {
     private OrderCartService orderCartService;
 
     @Mock
-    private OrderCartValidation orderCartValidation;
+    private OrderCartValidator orderCartValidator;
 
     @Mock
     private OrderFactory orderFactory;
@@ -99,10 +99,10 @@ class CreateOrderTest {
         );
 
         when(orderCartService.getCartData(authUser.id())).thenReturn(cart);
-        when(orderCartValidation.validateCartAndReturnMenu(cart)).thenReturn(Map.of(1L, menu));
+        when(orderCartValidator.validateCartAndReturnMenu(cart)).thenReturn(Map.of(1L, menu));
         when(orderFactory.createOrder(any(User.class), any(BigDecimal.class), anyMap(), anyList()))
             .thenReturn(order);
-        when(orderCartValidation.validateShop(any(Long.class), any(BigDecimal.class))).thenReturn(
+        when(orderCartValidator.validateShop(any(Long.class), any(BigDecimal.class))).thenReturn(
             shop);
 
         OrderResponseDto result = orderService.createOrder(authUser);
@@ -127,7 +127,7 @@ class CreateOrderTest {
         AuthUser authUser = new AuthUser(1L, "Test User", UserRole.USER);
         Cart cart = new Cart(List.of(new Cart.MenuItem(1L, 2)));
         when(orderCartService.getCartData(authUser.id())).thenReturn(cart);
-        when(orderCartValidation.validateCartAndReturnMenu(cart)).thenThrow(
+        when(orderCartValidator.validateCartAndReturnMenu(cart)).thenThrow(
             new InvalidRequestException(ErrorCode.MENU_NOT_FOUND));
 
         assertThrows(InvalidRequestException.class, () -> orderService.createOrder(authUser));

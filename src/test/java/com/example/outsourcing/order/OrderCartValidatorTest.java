@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.outsourcing.domain.cart.entity.Cart;
 import com.example.outsourcing.domain.common.exception.InvalidRequestException;
-import com.example.outsourcing.domain.order.service.OrderCartValidation;
+import com.example.outsourcing.domain.order.service.OrderCartValidator;
 import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.MenuRepository;
@@ -25,10 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-class OrderCartValidationTest {
+class OrderCartValidatorTest {
 
     @InjectMocks
-    private OrderCartValidation orderCartValidation;
+    private OrderCartValidator orderCartValidator;
 
     @Mock
     private MenuRepository menuRepository;
@@ -47,7 +47,7 @@ class OrderCartValidationTest {
 
         when(menuRepository.findByIdIn(List.of(1L))).thenReturn(List.of(menu));
 
-        Map<Long, Menu> result = orderCartValidation.validateCartAndReturnMenu(cart);
+        Map<Long, Menu> result = orderCartValidator.validateCartAndReturnMenu(cart);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -60,7 +60,7 @@ class OrderCartValidationTest {
         when(menuRepository.findByIdIn(List.of(1L))).thenReturn(List.of());
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateCartAndReturnMenu(cart));
+            () -> orderCartValidator.validateCartAndReturnMenu(cart));
     }
 
     @Test
@@ -78,7 +78,7 @@ class OrderCartValidationTest {
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
-        Shop result = orderCartValidation.validateShop(shopId, totalPrice);
+        Shop result = orderCartValidator.validateShop(shopId, totalPrice);
 
         assertNotNull(result);
         assertEquals(shopId, result.getId());
@@ -94,7 +94,7 @@ class OrderCartValidationTest {
         when(shopRepository.findById(shopId)).thenReturn(Optional.empty());
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateShop(shopId, totalPrice));
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
     }
 
     @Test
@@ -111,7 +111,7 @@ class OrderCartValidationTest {
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateShop(shopId, totalPrice));
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
     }
 
     @Test
@@ -129,7 +129,7 @@ class OrderCartValidationTest {
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateShop(shopId, totalPrice));
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
     }
 
     @Test
@@ -148,7 +148,7 @@ class OrderCartValidationTest {
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
 
         assertThrows(InvalidRequestException.class,
-            () -> orderCartValidation.validateShop(shopId, totalPrice));
+            () -> orderCartValidator.validateShop(shopId, totalPrice));
     }
 
 }
