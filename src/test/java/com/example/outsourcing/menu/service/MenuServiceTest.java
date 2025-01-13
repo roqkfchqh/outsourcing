@@ -109,8 +109,8 @@ public class MenuServiceTest {
         when(shopRepository.findById(shop.getId())).thenReturn(Optional.of(shop));
         when(validator.validateOwnership(2L, shop.getId()));
         // Mocking: validateOwnership 메서드가 InvalidRequestException을 던지도록 설정
-        doThrow(ErrorCode.FORBIDDEN_OPERATION.getMessage())
-            .when(validator).validateOwnership(2L, shop.getId());
+        doThrow(new InvalidRequestException(ErrorCode.FORBIDDEN_OWNER)
+            .when(validator).validateOwnership(2L, shop.getId()));
 
         MenuRequestDto menuRequestDto = new MenuRequestDto("Test Menu", "Description",
             BigDecimal.TEN, shop.getId());
