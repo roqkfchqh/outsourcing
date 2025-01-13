@@ -23,8 +23,7 @@ public class OrderCartValidator {
     private final ShopRepository shopRepository;
 
     public Map<Long, Menu> validateCartAndReturnMenu(Cart cart) {
-        List<Long> menuIds = cart.getMenuIds();
-        Map<Long, Menu> menus = findMenusByIds(menuIds);
+        Map<Long, Menu> menus = findMenusByCart(cart);
 
         for (Cart.MenuItem item : cart.getItems()) {
             Menu menu = menus.get(item.getMenuId());
@@ -49,7 +48,8 @@ public class OrderCartValidator {
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.SHOP_NOT_FOUND));
     }
 
-    private Map<Long, Menu> findMenusByIds(List<Long> menuIds) {
+    private Map<Long, Menu> findMenusByCart(Cart cart) {
+        List<Long> menuIds = cart.getMenuIds();
         List<Menu> menus = menuRepository.findByIdIn(menuIds);
         return menus.stream().collect(Collectors.toMap(Menu::getId, Function.identity()));
     }
