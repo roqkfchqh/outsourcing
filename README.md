@@ -74,6 +74,8 @@
 
 | 포스트                       | 태그            |
 | ----------------------------- | ------------- |
+| [리팩토링 일기: SRP 최대한 준수해보자](https://teamsparta.notion.site/SRP-5067f5ab5b2c420b9e30f2b06df4e7b5) | `SRP` `Refactoring` |
+| [AOP로 인가 관심사 분리하기](https://teamsparta.notion.site/AOP-244679c937a348a2a0ba9ac3ff085ac4) | `AOP` `Pointcut` |
 | [Spring Scheduler로 DB 주기적으로 업데이트 하기](https://teamsparta.notion.site/Spring-Scheduler-DB-e9aeb4d3875946e696c2882373511ba6) | `Spring Scheduler` `Cron` |
 | [FULLTEXT 검색으로 성능 개선](https://teamsparta.notion.site/FULLTEXT-8d9c64e8ddab4c9f920ec22108f5801a) | `FULLTEXT INDEX` `MySQL`|
 | [HQL Parsing 에러](https://teamsparta.notion.site/HQL-Parsing-0e8ef1ebe82e4b568f144cd18db41b8a) | `QueryDSL` `Dialect` |
