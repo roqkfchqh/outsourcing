@@ -12,10 +12,8 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다. 로그인이 필요합니다."),
     WRONG_EMAIL(HttpStatus.UNAUTHORIZED, "이메일을 잘못 입력하였습니다."),
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호를 잘못 입력하였습니다."),
-    AUTH(HttpStatus.UNAUTHORIZED, "@Auth와 AuthUser 타입은 함께 사용되어야 합니다."),
 
     //invalid
-    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."),
     ALREADY_USED_EMAIL(HttpStatus.BAD_REQUEST, "이미 사용중인 이메일입니다."),
     PAGING_ERROR(HttpStatus.BAD_REQUEST, "페이지 입력값이 잘못되었습니다."),
     ORDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 주문이 존재하지 않습니다."),
@@ -36,7 +34,6 @@ public enum ErrorCode {
     MIN_ORDER_PRICE_MUST_BE_GREATER_THAN_ZERO(HttpStatus.BAD_REQUEST, "최소 주문 금액은 0보다 커야 합니다."),
     PRICE_MUST_BE_GREATER_THAN_ZERO(HttpStatus.BAD_REQUEST, "가격은 0보다 커야 합니다."),
     USER_MAX_SHOPS_REACHED(HttpStatus.BAD_REQUEST, "최대 허용된 가게 수를 초과했습니다."),
-    MENU_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 메뉴입니다."),
     ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 완료된 주문입니다."),
     CANNOT_REVIEW(HttpStatus.BAD_REQUEST, "리뷰 작성 기한(7일)이 지났습니다."),
 

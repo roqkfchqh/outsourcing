@@ -15,8 +15,6 @@ import com.example.outsourcing.domain.user.dto.SignUpRequestDto;
 import com.example.outsourcing.domain.user.entity.User;
 import com.example.outsourcing.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

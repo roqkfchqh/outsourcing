@@ -2,7 +2,6 @@ package com.example.outsourcing.config;
 
 import com.example.outsourcing.domain.common.util.JwtUtil;
 import com.example.outsourcing.domain.user.entity.User.UserRole;
-import com.example.outsourcing.domain.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -24,7 +23,8 @@ import org.springframework.util.PatternMatchUtils;
 @RequiredArgsConstructor
 public class JwtFilter implements Filter {
 
-    private static final String[] WHITE_LIST = {"/", "/auth/register", "/auth/login", "/auth/logout"};
+    private static final String[] WHITE_LIST = {"/", "/auth/register", "/auth/login",
+        "/auth/logout"};
     private final JwtUtil jwtUtil;
 
     @Override
@@ -44,7 +44,6 @@ public class JwtFilter implements Filter {
 
         // 요청URL 중, 포트번호와 쿼리 사이의 부분을 가져와서 문자열형 url로 저장 (컨텍스트 경로 + 서블릿 경로)
         String url = httpRequest.getRequestURI();
-
 
         if (isWhiteList(url)) {
             chain.doFilter(request, response);

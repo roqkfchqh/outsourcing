@@ -105,7 +105,7 @@ public class Order extends Timestamped {
 
     public void validateIsCompleted() {
         if (status != Status.COMPLETED) {
-            throw new InvalidRequestException(ErrorCode.ALREADY_COMPLETED);
+            throw new InvalidRequestException(ErrorCode.NOT_COMPLETED_ORDER);
         }
     }
 
