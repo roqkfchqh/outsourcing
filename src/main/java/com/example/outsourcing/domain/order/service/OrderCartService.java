@@ -20,7 +20,7 @@ public class OrderCartService {
             throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
         }
         Cart cart = cache.get(userId, Cart.class);
-        if (cart == null || cart.getItems().isEmpty()) {
+        if (cart == null || cart.getItems().items().isEmpty()) {
             throw new InvalidRequestException(ErrorCode.CART_IS_EMPTY);
         }
         return cart;
