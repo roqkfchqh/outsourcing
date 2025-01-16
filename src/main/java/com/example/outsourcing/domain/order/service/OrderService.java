@@ -7,17 +7,16 @@ import com.example.outsourcing.domain.common.exception.InvalidRequestException;
 import com.example.outsourcing.domain.common.exception.base.ErrorCode;
 import com.example.outsourcing.domain.order.dto.OrderMenuResponseDto;
 import com.example.outsourcing.domain.order.dto.OrderResponseDto;
+import com.example.outsourcing.domain.order.entity.Menus;
 import com.example.outsourcing.domain.order.entity.Order;
 import com.example.outsourcing.domain.order.mapper.OrderMapper;
 import com.example.outsourcing.domain.order.mapper.OrderMenuMapper;
 import com.example.outsourcing.domain.order.repository.OrderRepository;
-import com.example.outsourcing.domain.shop.entity.Menu;
 import com.example.outsourcing.domain.shop.entity.Shop;
 import com.example.outsourcing.domain.shop.repository.ShopRepository;
 import com.example.outsourcing.domain.user.entity.User;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,8 +36,8 @@ public class OrderService {
     @Transactional
     public OrderResponseDto createOrder(AuthUser user) {
         Cart cart = orderCartService.getCartData(user.id());
-        Map<Long, Menu> menus = cartValidator.validateCartAndReturnMenu(cart);
-        BigDecimal totalPrice = getTotalPrice(cart, menus);
+        Menus menus = cartValidator.validateCartAndReturnMenu(cart);
+        BigDecimal totalPrice = cart.getItems().calculateTotalPrice(menus);
         Shop shop = cartValidator.validateShop(cart.getRecentShopId(), totalPrice);
         Order order = orderFactory.createOrder(User.fromAuthUser(user), totalPrice, menus,
             cart.getItems());
@@ -106,17 +105,6 @@ public class OrderService {
     private Order findOrder(Long orderId) {
         return orderRepository.findById(orderId)
             .orElseThrow(() -> new InvalidRequestException(ErrorCode.ORDER_NOT_FOUND));
-    }
-
-    private BigDecimal getTotalPrice(Cart cart, Map<Long, Menu> menus) {
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        for (Cart.MenuItem item : cart.getItems()) {
-            Menu menu = menus.get(item.getMenuId());
-            totalPrice = totalPrice.add(
-                menu.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
-            );
-        }
-        return totalPrice;
     }
 
     private Shop findShop(Long shopId) {

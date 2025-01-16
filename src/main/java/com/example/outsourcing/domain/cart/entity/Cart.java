@@ -1,10 +1,8 @@
 package com.example.outsourcing.domain.cart.entity;
 
-import com.example.outsourcing.domain.common.exception.InvalidRequestException;
-import com.example.outsourcing.domain.common.exception.base.ErrorCode;
+import com.example.outsourcing.domain.order.entity.Items;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,42 +12,32 @@ import lombok.NoArgsConstructor;
 public class Cart {
 
     private Long recentShopId;
-    private List<MenuItem> items = new ArrayList<>();
+    private Items items;
 
-    public Cart(List<MenuItem> items) {
-        this.items = items;
+    public Cart(List<MenuItem> menuItems) {
+        this.items = new Items(menuItems);
     }
 
-    public Cart(Long shopId, List<MenuItem> items) {
+    public Cart(Long shopId, List<MenuItem> menuItems) {
         this.recentShopId = shopId;
-        this.items = items;
+        this.items = new Items(menuItems);
     }
 
     public void addItem(Long menuId, Long shopId) {
         // 최근 가게가 아닌 경우, 장바구니 새로 추가
         if (recentShopId != null && !recentShopId.equals(shopId)) {
-            items.clear();
+            items = new Items(new ArrayList<>());
         }
         recentShopId = shopId;
-
-        items.stream().filter(item -> item.getMenuId().equals(menuId)).findFirst()
-            .ifPresentOrElse(MenuItem::increase, () -> items.add(new MenuItem(menuId)));
+        items.addItem(menuId);
     }
 
-    public void removeItem(Long menuItemId) {
-        MenuItem menuItem = items.stream().filter(item -> item.getMenuId().equals(menuItemId))
-            .findFirst()
-            .orElseThrow(() -> new InvalidRequestException(ErrorCode.CART_ITEM_NOT_FOUND));
-
-        // 장바구니에서 물건 뺐을 때 수량이 없다면 지워주기
-        menuItem.decrease();
-        if (menuItem.getQuantity() == 0) {
-            items.remove(menuItem);
-        }
+    public void removeItem(Long menuId) {
+        items.removeItem(menuId);
     }
 
     public List<Long> getMenuIds() {
-        return items.stream().map(MenuItem::getMenuId).collect(Collectors.toList());
+        return items.getMenuIds();
     }
 
     @Getter
@@ -59,16 +47,16 @@ public class Cart {
         private final Long menuId;
         private int quantity;
 
-        private MenuItem(Long menuId) {
+        public MenuItem(Long menuId) {
             this.menuId = menuId;
             quantity = 1;
         }
 
-        private void increase() {
+        public void increase() {
             this.quantity += 1;
         }
 
-        private void decrease() {
+        public void decrease() {
             this.quantity -= 1;
         }
     }
